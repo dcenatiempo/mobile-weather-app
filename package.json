@@ -2,9 +2,10 @@
   "name": "mobile-weather-app",
   "version": "0.1.0",
   "description": "A mobile first responsive weather app",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "node app.js",
+    "dev": "nodemon app.js -e js,html,ejs",
     "test": "mocha"
   },
   "repository": {
