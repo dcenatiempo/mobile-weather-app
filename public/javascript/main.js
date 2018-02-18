@@ -45,7 +45,7 @@ function getWeather(myLocal){
   var path = 'weather/'
   var url = devUrl + path + myLocal.lat + ',' + myLocal.long;
   var request = new Request(url, {
-      mode: 'cors'
+      mode: 'no-cors'
     });
 
   fetch(request)
