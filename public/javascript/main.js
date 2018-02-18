@@ -6,27 +6,27 @@ console.log("hello world")
 var myLocal = {};
 var weather = {};
 
-// fetch('https://freegeoip.net/json/?callback=')
-//   .then(resp => {
-//     return resp.json();
-//   }).then(json => {
-//     //console.log(json);
-//     myLocal = saveLocal(json);
-//     //console.log(myLocal)
-//     localStorage.setItem("myLocal", JSON.stringify(myLocal));
-//     getWeather(myLocal);
-//   }).catch(err => {
-//     console.error(err);
-//     console.warn("trouble getting location")
-//     myLocal = JSON.parse(localStorage.getItem("myLocal"));
-//     if (myLocal === null) {
-//       console.err("no location saved in storage")
-//     }
-//     else {
-//       console.warn("your last saved location is " + myLocal.city)
-//       getWeather(myLocal);
-//     }
-//   });
+fetch('https://freegeoip.net/json/?callback=')
+  .then(resp => {
+    return resp.json();
+  }).then(json => {
+    //console.log(json);
+    myLocal = saveLocal(json);
+    //console.log(myLocal)
+    localStorage.setItem("myLocal", JSON.stringify(myLocal));
+    getWeather(myLocal);
+  }).catch(err => {
+    console.error(err);
+    console.warn("trouble getting location")
+    myLocal = JSON.parse(localStorage.getItem("myLocal"));
+    if (myLocal === null) {
+      console.err("no location saved in storage")
+    }
+    else {
+      console.warn("your last saved location is " + myLocal.city)
+      getWeather(myLocal);
+    }
+  });
 
 function saveLocal(json){
   return {
