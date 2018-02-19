@@ -4,14 +4,15 @@
   <% include ../partials/header.ejs %>
 </head>
 <body>
-<main id="primary" class="city-page front">
-  <h1>This is the font side</h1>
-  <h2>I have been flipped <span>0</span> times</h2>
-</main>
-<main id="secondary" class="city-page back">
-  <h1>This is the back side</h1>
-  <h2>I have been flipped <span>-1</span> times</h2>
-</main>
+  <main id="a" class="city-page front">
+    <% include ../partials/card.ejs %>
+  </main>
+  <main id="b" class="city-page left">
+    <% include ../partials/card.ejs %>
+  </main>
+  <main id="c" class="city-page right">
+    <% include ../partials/card.ejs %>
+  </main>
 </body>
 <% include ../partials/scripts.ejs %>
 </html>

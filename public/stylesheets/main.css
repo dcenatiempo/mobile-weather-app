@@ -16,21 +16,34 @@ body {
   width: 100vw;
   overflow: hidden;
   position: absolute;
-  transition: all 2s;
+
 }
-#secondary {
+#a {
+  background-color: burlywood;
+  transform: rotateY(0deg);
+}
+#b {
   background-color: purple;
-}
-#primary {
-  background-color:burlywood;
-}
-.back {
   transform: rotateY(180deg);
-  z-index: 0;
+}
+#c {
+  background-color: olivedrab;
+  transform: rotateY(-180deg);
 }
 .front {
-  transform: rotateY(0deg);
-  z-index: 4;
+  z-index: 100;
+  transition: all .5s;
+  visibility: visible;
+}
+.left {
+  z-index: 1;
+  transition: all .5s;
+  visibility: hidden;
+}
+.right {
+  z-index: 1;
+  transition: all .5s;
+  visibility: hidden;
 }
 
 
