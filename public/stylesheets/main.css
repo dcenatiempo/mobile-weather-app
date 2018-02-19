@@ -5,10 +5,35 @@
   font-family: Helvetica, sans-serif;
   font-weight: normal;
 }
-
+body {
+  perspective: 150vw;
+  height: 100vh;
+  overflow: hidden;
+}
 /* Portrait, Mobile */
 .city-page {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  position: absolute;
+  transition: all 2s;
 }
+#secondary {
+  background-color: purple;
+}
+#primary {
+  background-color:burlywood;
+}
+.back {
+  transform: rotateY(180deg);
+  z-index: 0;
+}
+.front {
+  transform: rotateY(0deg);
+  z-index: 4;
+}
+
+
 /* Top Section */
 .todays-forecast {
   /* GRID LAYOUT */
@@ -74,11 +99,7 @@
 /* Bottom Section */
 .week-forecast {
   background-color: rgb(95, 103, 116);
-  position: absolute;
-  top: 60vw;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  height: calc(100vh - 60vw);
   overflow-y: auto;
   padding: 2vw;
 }

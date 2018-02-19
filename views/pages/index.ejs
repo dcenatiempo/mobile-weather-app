@@ -4,85 +4,13 @@
   <% include ../partials/header.ejs %>
 </head>
 <body>
-<main id="primary" class="city-page">
-  <section class="todays-forecast">
-    <h1 class="city">Salt Lake City</h1>
-    <h2 class="summary">
-      <span class="day">Mon</span>
-      <span class="time">4 PM</span>
-      <span class="?">Mostly Cloudy</span>
-    </h2>
-    <div class="weather-icon">icon</div>
-    <h2 class="temp">33°</h2>
-    <div class="details">
-      <p>Precip:</p>
-      <p class="precip">10%</p>
-      <p>Humidity:</p>
-      <p class="humidity">30%</p>
-      <p>Wind:</p>
-      <p class="wind">5mph</p>
-    </div>
-    <h3 class="forecast">
-      Here is the forecast for the next 24 hours
-    </h3>
-    <div class="slider"><div class="handle"></div></div>
-  </section>
-  <section class="week-forecast">
-    <h3 class="forecast">
-      Here is the forecast for the next few days
-    </h3>
-    <ul class="week">
-      <li>
-        <span class="day">Tuesday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Wednesday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Thursday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Friday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Saturday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Sunday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-      <li>
-        <span class="day">Monday</span>
-        <span class="weather-icon">icon</span>
-        <span class="temp">
-          <span class="hi">45°</span><span class="lo">29°</span>
-        </span>
-      </li>
-    </ul>
-  </section>
+<main id="primary" class="city-page front">
+  <h1>This is the font side</h1>
+  <h2>I have been flipped <span>0</span> times</h2>
+</main>
+<main id="secondary" class="city-page back">
+  <h1>This is the back side</h1>
+  <h2>I have been flipped <span>-1</span> times</h2>
 </main>
 </body>
 <% include ../partials/scripts.ejs %>
