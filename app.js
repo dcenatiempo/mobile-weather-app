@@ -18,15 +18,28 @@ app.get('/weather/:geo', async (req, res) => {
   let coords = req.params.geo;
   res.json(await getWeather(coords));
 });
+app.get('/location/:local', async (req, res) => {
+  let local = req.params.local;
+  res.json(await getLocal(local));
+})
 
 const server = app.listen(PORT, () => {
   console.log(`Listening on ${ PORT }`);
 });
 
-// I cannot use api key from client side... must set up node server :(
+// https://darksky.net/
 async function getWeather(myLocal){
   const apiKey = 'fc4be215ca9376fe83fcdcaf1b226d86';
   let url = `https://api.darksky.net/forecast/${apiKey}/${myLocal}`;
+  let response = await fetch(url);
+  let data = await response.json();
+  return data;
+}
+
+//https://locationiq.org/
+async function getLocal(local){
+  const apiKey = '94be5df0e46402';
+  let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${local}&format=json`;
   let response = await fetch(url);
   let data = await response.json();
   return data;
