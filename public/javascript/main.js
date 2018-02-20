@@ -1,9 +1,5 @@
-// location api
-//https://freegeoip.net/json/?callback=?
-
-
 console.log("hello world")
-var myLocal = {};
+var myLocals = [];
 var weather = {};
 var cards = {
   a: {
@@ -25,35 +21,37 @@ fetch('https://freegeoip.net/json/?callback=')
     return resp.json();
   }).then(json => {
     //console.log(json);
-    myLocal = saveLocal(json);
+    myLocals = saveLocal(json);
     //console.log(myLocal)
-    localStorage.setItem("myLocal", JSON.stringify(myLocal));
-    getWeather(myLocal);
+    localStorage.setItem("myLocal", JSON.stringify(myLocals));
+    getWeather(myLocals[0]);
   }).catch(err => {
     console.error(err);
     console.warn("trouble getting location")
-    myLocal = JSON.parse(localStorage.getItem("myLocal"));
-    if (myLocal === null) {
+    myLocals = JSON.parse(localStorage.getItem("myLocal"));
+    if (myLocals === null) {
       console.err("no location saved in storage")
     }
     else {
-      console.warn("your last saved location is " + myLocal.city)
-      getWeather(myLocal);
+      console.warn("your last saved location is " + myLocals[0].city)
+      getWeather(myLocals[0]);
     }
   });
 
 function saveLocal(json){
-  return {
-    lat: json.latitude,
-    long: json.longitude,
-    city: json.city,
-    state: json.region_code,
-    //date: new Date()
-  };
+  return [
+    {
+      lat: json.latitude,
+      long: json.longitude,
+      city: json.city,
+      state: json.region_code,
+      //date: new Date()
+    }
+  ]
 }
 
-
 function getWeather(myLocal){
+  console.log(myLocal)
   var prodUrl = 'https://devins-weather-app.herokuapp.com/';
   var devUrl = 'http://localhost:5000/';
   var path = 'weather/'
@@ -70,9 +68,6 @@ function getWeather(myLocal){
     console.error(err);
   });
 }
-
-var weatherCards = document.querySelectorAll('.city-page')
-
 
   window.addEventListener('keydown', e => {
     if (e.keyCode === 37) { // rotate left
@@ -144,8 +139,8 @@ function normalizePos(num) {
   }
   return mod;
 }
-function numToPos (num) {
 
+function numToPos (num) {
   var pos;
   switch (normalizePos(num)) {
     case 0: 

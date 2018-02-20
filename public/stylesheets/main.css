@@ -9,6 +9,7 @@ body {
   perspective: 150vw;
   height: 100vh;
   overflow: hidden;
+  background-color: gray;
 }
 /* Portrait, Mobile */
 .city-page {
@@ -19,58 +20,62 @@ body {
 
 }
 #a {
-  background-color: burlywood;
+  background-color: white;
   transform: rotateY(0deg);
 }
 #b {
-  background-color: purple;
+  background-color: white;
   transform: rotateY(180deg);
 }
 #c {
-  background-color: olivedrab;
+  background-color: white;
   transform: rotateY(-180deg);
 }
 .front {
   z-index: 100;
-  transition: all .5s;
+  transition: transform .5s, z-index .5s, visibility .5s;
   visibility: visible;
 }
 .left {
   z-index: 1;
-  transition: all .5s;
+  transition: transform .5s, z-index .5s, visibility .5s;
   visibility: hidden;
 }
 .right {
   z-index: 1;
-  transition: all .5s;
+  transition: transform .5s, z-index .5s, visibility .5s;
   visibility: hidden;
 }
 
+.lo {
+  color: gray;
+}
+.lo::before {
+  content: ' ';
+}
 
 /* Top Section */
 .todays-forecast {
   /* GRID LAYOUT */
   display: grid;
-  grid-template-columns: 1fr 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr 1fr;
   /***************/
   padding: 2vw;
-  background-color: rgb(95, 116, 95);
-  height: 60vw;
+  background-color: white;
+  height: 75vw;
 }
 .city {
   grid-row: 1;
   grid-column: 1 / 4;
   font-size: 12vw;
+  margin-top:4vw;
 }
 .summary {
   grid-row: 2;
   grid-column: 1 / 4;
-  font-size: 8vw;
+  font-size: 7vw;
   color: gray;
-}
-.todays-forecast .weather-icon {
-  grid-row: 3;
-  grid-column: 1 / 2;
+  margin-bottom: 4vw;
 }
 .todays-forecast .temp {
   grid-row: 3;
@@ -82,7 +87,7 @@ body {
   grid-column: 3 / 4;
   /* GRID LAYOUT */
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr;
   grid-column-gap: 2vw;
   grid-row-gap: 1vw;
   align-content: center;
@@ -97,24 +102,36 @@ body {
 .forecast {
   grid-column: 1 / 4;
   font-size: 4.5vw;
+  height: 10vw;
+  overflow: auto;
 }
 .slider {
   grid-column: 1 / 4;
   height: 2vw;
-  width: 100vw;
+  width: 96vw;
   background-color: gray;
+  margin: 4vw 0;
 }
 .handle {
-  height:4vw;
-  width: 2vw;
+  height:8vw;
+  width: 4vw;
   background-color: black;
+  transform: translateY(-3vw);
+  border-radius: 2vw;
 }
 /* Bottom Section */
 .week-forecast {
-  background-color: rgb(95, 103, 116);
+  background-color: white;
   height: calc(100vh - 60vw);
   overflow-y: auto;
   padding: 2vw;
+}
+.week-forecast .forecast {
+  height: initial;
+  overflow: initial;
+}
+.week {
+  margin-top: 4vw;
 }
 .week * {
   font-size: 6vw;
@@ -123,16 +140,112 @@ body {
   /* GRID LAYOUT */
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  align-content: center;
+  align-items: center;
+  justify-content: center;
   /***************/
+  margin-top: 3vw;
 }
-.week-forecast .weather-icon {
-  color: red;
-  justify-self: center;
-}
+
 .week-forecast .temp {
   justify-self: end;
 }
 /* Landscape, Mobile */
 
 /* Desktop */
+
+/* Weather Icons */
+.weather-icon {
+  background-image: url('../images/weather-icons.jpg')
+}
+.todays-forecast .weather-icon {
+  grid-row: 3;
+  grid-column: 1 / 2;
+  width: 24vw;
+  height: 18vw;
+  align-self: center;
+  justify-self: center;
+  background-size: 120vw;
+}
+.week-forecast .weather-icon {
+  color: red;
+  width: 16vw;
+  height: 12vw;
+  justify-self: center;
+  background-size: 89vw;
+}
+
+.sunny {
+  background-position: 0% 1%;
+}
+.partly-cloudy {
+  background-position: 26% 1%;
+}
+.partly-sunny {
+  background-position: 50% 1%;
+}
+.cloudy {
+  background-position: 77% 1%;
+}
+.light-rain {
+  background-position: 100% 1%;
+}
+.rain {
+  background-position: 0% 1%;
+}
+.thunderstorm {
+  background-position: 26% 26%;
+}
+.stormy {
+  background-position: 50% 26%;
+}
+.light-snow {
+  background-position: 74% 26%;
+}
+.snow {
+  background-position: 100% 26%;
+}
+.partly-sunny-rain {
+  background-position: 0% 53%;
+}
+.rainbow {
+  background-position: 26% 53%;
+}
+.partly-cloudy-windy {
+  background-position: 50% 53%;
+}
+.partly-sunny-windy {
+  background-position: 74% 53%;
+}
+.tornado {
+  background-position: 100% 53%;
+}
+.sunset {
+  background-position: 0% 77%;
+}
+.sunrise {
+  background-position: 26% 77%;
+}
+.cold {
+  background-position: 50% 77%;
+}
+.mild {
+  background-position: 74% 77%;
+}
+.hot {
+  background-position: 100% 77%;
+}
+.snowflake {
+  background-position: 0% 101%;
+}
+.lightning {
+  background-position: 26% 101%;
+}
+.windy {
+  background-position: 50% 101%;
+}
+.fahrenheit {
+  background-position: 74% 101%;
+}
+.celcius {
+  background-position: 100% 101%;
+}
