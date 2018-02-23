@@ -220,7 +220,8 @@ document.querySelector('.slider').addEventListener('input', (e) => {
 })
 
 document.addEventListener("touchstart", (e)=> {
-  document.addEventListener("touchmove", onTouchMove)
+  if (!e.target.classList.contains('.slider'))
+    document.addEventListener("touchmove", onTouchMove)
   console.log(e)
   touchStart = {
     x: e.changedTouches[0].clientX,
