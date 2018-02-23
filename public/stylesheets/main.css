@@ -120,9 +120,9 @@ body {
 .slider {
   grid-column: 1 / 4;
   height: .5rem;
-  width: 96vw;
+  width: 80vw;
   background-color: gray;
-  margin: 1rem 0;
+  margin: 1rem auto;
 }
 .handle {
   height:2rem;
