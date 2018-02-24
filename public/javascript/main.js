@@ -176,7 +176,7 @@ function renderHourly(card, index, h) {
   card.querySelector('.todays-forecast .temp').innerText = Math.round(weather[index].hourly.data[h].temperature);
   card.querySelector('.todays-forecast .precip').innerText = Math.round(weather[index].hourly.data[h].precipProbability * 100);
   card.querySelector('.todays-forecast .humidity').innerText = Math.round(weather[index].hourly.data[h].humidity * 100);
-  card.querySelector('.todays-forecast .wind').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
+  card.querySelector('.todays-forecast .windSpeed').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
 }
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
