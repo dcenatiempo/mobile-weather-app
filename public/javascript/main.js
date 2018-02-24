@@ -53,7 +53,7 @@ function getWeather(myLocal, index){
   var prodUrl = 'https://devins-weather-app.herokuapp.com/';
   var devUrl = 'http://localhost:5000/';
   var path = 'weather/'
-  var url = devUrl + path + myLocal.lat + ',' + myLocal.long;
+  var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
 
   // for testing only
   // weather[index] = testJson;
