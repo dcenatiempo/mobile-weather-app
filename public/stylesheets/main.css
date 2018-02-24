@@ -167,97 +167,59 @@ body {
 
 /* Weather Icons */
 .weather-icon {
-  background-image: url('../images/weather-icons.jpg')
+  
 }
 .todays-forecast .weather-icon {
   grid-row: 3;
   grid-column: 1 / 2;
-  width: 6rem;
+  width: 5.5rem;
   height: 4.5rem;
   align-self: center;
   justify-self: center;
-  background-size: 30rem;
+  background-size: 7rem;
+  background-position: -1rem -1.2rem;
 }
 .week-forecast .weather-icon {
-  color: red;
-  width: 4rem;
-  height: 3rem;
+  width: 4.5rem;
+  height: 3.5rem;
   justify-self: center;
-  background-size: 22rem;
+  background-size: 5rem;
+  background-position: -.5rem -.75rem;
 }
 
-.sunny {
-  background-position: 0% 1%;
+.clear-day, .clear-night {
+  background-image: url('../images/Sun.svg');
 }
 .partly-cloudy-day, .partly-cloudy-night {
-  background-position: 26% 1%;
-}
-.partly-sunny {
-  background-position: 50% 1%;
+  background-image: url('../images/Cloud-Sun.svg');
 }
 .cloudy {
-  background-position: 77% 1%;
-}
-.light-rain {
-  background-position: 100% 1%;
+  background-image: url('../images/Cloud.svg');
 }
 .rain {
-  background-position: 0% 1%;
-}
-.thunderstorm {
-  background-position: 26% 26%;
-}
-.stormy {
-  background-position: 50% 26%;
-}
-.light-snow {
-  background-position: 74% 26%;
+  background-image: url('../images/Cloud-Rain.svg');
 }
 .snow {
-  background-position: 100% 26%;
+  background-image: url('../images/Cloud-Snow.svg');
 }
-.partly-sunny-rain {
-  background-position: 0% 53%;
+.sleet {
+  background-image: url('../images/Cloud-Sleet.svg');
 }
-.rainbow {
-  background-position: 26% 53%;
+.wind {
+  background-image: url('../images/Wind.svg');
 }
-.partly-cloudy-windy {
-  background-position: 50% 53%;
+.fog {
+  background-image: url('../images/Cloud-Fog.svg');
 }
-.partly-sunny-windy {
-  background-position: 74% 53%;
+.hail {
+  background-image: url('../images/Cloud-Hail.svg');
+}
+.thunderstorm {
+  background-image: url('../images/Cloud-Lightning.svg');
 }
 .tornado {
-  background-position: 100% 53%;
+  background-image: url('../images/Tornado.svg');
 }
-.sunset {
-  background-position: 0% 77%;
-}
-.sunrise {
-  background-position: 26% 77%;
-}
-.cold {
-  background-position: 50% 77%;
-}
-.mild {
-  background-position: 74% 77%;
-}
-.hot {
-  background-position: 100% 77%;
-}
-.snowflake {
-  background-position: 0% 101%;
-}
-.lightning {
-  background-position: 26% 101%;
-}
-.windy {
-  background-position: 50% 101%;
-}
-.fahrenheit {
-  background-position: 74% 101%;
-}
-.celcius {
-  background-position: 100% 101%;
+.unknown {
+  background-image: url('../images/Unknown.svg');
 }

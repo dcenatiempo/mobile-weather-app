@@ -53,7 +53,7 @@ function getWeather(myLocal, index){
   var prodUrl = 'https://devins-weather-app.herokuapp.com/';
   var devUrl = 'http://localhost:5000/';
   var path = 'weather/'
-  var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
+  var url = devUrl + path + myLocal.lat + ',' + myLocal.long;
 
   // for testing only
   // weather[index] = testJson;
@@ -162,20 +162,30 @@ function renderWeather(index) {
   var card = document.getElementById(cardId);
   console.log(card)
   card.querySelector('.city').innerText = myLocals[index].city;
-  renderHourly(card, index, 0);
   card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
+  renderHourly(card, index, 0);//TODO
+  renderWeekly(card, index);
 }
 
 function renderHourly(card, index, h) {
   card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time);
   card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time);
   card.querySelector('.summary .weather-summary').innerText = weather[index].hourly.data[h].summary;
-  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${weather[index].hourly.data[h].icon}`
+  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${weather[index].hourly.data[h].icon}`;
   card.querySelector('.todays-forecast .temp').innerText = Math.round(weather[index].hourly.data[h].temperature);
   card.querySelector('.todays-forecast .precip').innerText = Math.round(weather[index].hourly.data[h].precipProbability * 100);
   card.querySelector('.todays-forecast .humidity').innerText = Math.round(weather[index].hourly.data[h].humidity * 100);
   card.querySelector('.todays-forecast .wind').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
+}
+function renderWeekly(card, index) {
+  var li = card.querySelectorAll('.week li');
+  weather[index].daily.data.forEach((day, index)=> {
+    li[index].querySelector('.day').innerText = getDay(day.time);
+    li[index].querySelector('.weather-icon').className = `weather-icon ${day.icon}`;
+    li[index].querySelector('.temp .hi').innerText = Math.round(day.temperatureHigh);
+    li[index].querySelector('.temp .lo').innerText = Math.round(day.temperatureLow);
+  })
 }
 
 function indexToCard(index) {
@@ -220,8 +230,9 @@ document.querySelector('.slider').addEventListener('input', (e) => {
 })
 
 document.addEventListener("touchstart", (e)=> {
-  if (!e.target.classList.contains('slider'))
+  if (!e.target.classList.contains('slider')) {
     document.addEventListener("touchmove", onTouchMove)
+  }
   console.log(e)
   touchStart = {
     x: e.changedTouches[0].clientX,
