@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 var currentLocation = null;  // current location
 var myLocals = [];        // array of saved locations
@@ -70,6 +70,11 @@ else {
 function transferCurrentLocation(index, current) {
   console.log('current local: ', current);
   myLocals[index] = current;
+  saveToLocalStorage(myLocals);
+}
+
+function saveToLocalStorage(item) {
+  localStorage.setItem('myLocals', JSON.stringify(item))
 }
 
 function initialRender(myLocals){
