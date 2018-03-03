@@ -29,10 +29,12 @@ if ("geolocation" in navigator) {
   console.log('location not available')
 }
 function success(pos) {
+  var data = getCity(pos.coords.latitude, pos.coords.longitude);
 
   currentLocation.lat = pos.coords.latitude;
   currentLocation.long = pos.coords.longitude;
-  console.log(getCity(pos.coords.latitude, pos.coords.longitude))
+  currentLocation.city = data.address.city;
+  currentLocation.state = data.address.state;
 }
 
 async function getCity(lat, long){
