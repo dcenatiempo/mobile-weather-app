@@ -34,7 +34,10 @@ if ("geolocation" in navigator) {
     });
   }
   catch(e){
-    getCurrentPosition()
+    setTimeout(()=>{
+      if (!currentLocation)
+      getCurrentPosition();
+    },5000);
   }
 } else {
   getCurrentPosition();
