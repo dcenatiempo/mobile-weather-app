@@ -43,7 +43,8 @@ async function getWeather(myLocal){
 //https://locationiq.org/
 async function reverseGeo(local){
   const apiKey = '94be5df0e46402';
-  let url = `https://us1.locationiq.org/v1/reverse.php?key=${apiKey}&q=${local}&format=json`;
+  local = local.split(',');
+  let url = `https://us1.locationiq.org/v1/reverse.php?key=${apiKey}&lat=${local[0]}&lon=${local[1]}&format=json`;
   let response = await fetch(url);
   let data = await response.json();
   return data;
