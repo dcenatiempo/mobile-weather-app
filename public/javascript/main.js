@@ -1,7 +1,7 @@
-console.log("hello world")
-var myLocals = [];
-var weather = [];
-var cards = {
+var currentLocation ={};  // current location
+var myLocals = [];        // array of saved locations
+var weather = [];         // array of weather corresponding to myLocals
+var cards = {             // position of 3 weather cards in DOM
   a: {
     rotation: 0,
     position: 0 //'front'
@@ -15,10 +15,10 @@ var cards = {
     position: 2 //'left'
   }
 }
-debugger
+
 if ("geolocation" in navigator) {
   /* geolocation is available */
-  console.log('location available')
+  console.log('location available');
   navigator.geolocation.getCurrentPosition(success);
 } else {
   /* geolocation IS NOT available */
@@ -26,6 +26,7 @@ if ("geolocation" in navigator) {
 }
 function success(pos) {
   var crd = pos.coords;
+  console.log(pos)
 
   console.log('Your current position is:');
   console.log(`Latitude : ${crd.latitude}`);
