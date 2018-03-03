@@ -53,7 +53,6 @@ if ('myLocals' in localStorage) {
   initialRender(myLocals)
 }
 else {
-  debugger
   console.log('no locations in storage, getting location now...');
   if (!currentLocation) {
     document.addEventListener('currentLocationUpdated', function namedFunc(){
