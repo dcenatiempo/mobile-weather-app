@@ -1,7 +1,11 @@
-console.log("hello world")
-var myLocals = [];
-var weather = [];
-var cards = {
+var prodUrl = 'https://devins-weather-app.herokuapp.com/';
+var devUrl = 'http://localhost:5000/';
+var appUrl = prodUrl;
+
+var currentLocation = null;  // current location
+var myLocals = [];        // array of saved locations
+var weather = [];         // array of weather corresponding to myLocals
+var cards = {             // position of 3 weather cards in DOM
   a: {
     rotation: 0,
     position: 0 //'front'
@@ -15,81 +19,126 @@ var cards = {
     position: 2 //'left'
   }
 }
-debugger
+var currentLocationUpdated = new Event('currentLocationUpdated');
+
+/* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
-  /* geolocation is available */
-  console.log('location available')
-  navigator.geolocation.getCurrentPosition(success);
+  // use geolocation API
+  navigator.geolocation.getCurrentPosition(getCurrentPositionCallback);
+  // check to see if permission denied
+  try{
+    navigator.permissions.query({name:'geolocation'})
+    .then(resp =>{
+      if (resp.state === "denied")
+        getCurrentPosition();
+    });
+  }
+  catch(e){
+    // In safari, this will always catch
+    // Wait to see if geolocation API works,
+    //   if not, use alternate geo API
+    setTimeout(()=>{
+      if (!currentLocation)
+      getCurrentPosition();
+    },1000);
+  }
 } else {
-  /* geolocation IS NOT available */
-  console.log('location not available')
+  getCurrentPosition();
 }
-function success(pos) {
-  var crd = pos.coords;
 
-  console.log('Your current position is:');
-  console.log(`Latitude : ${crd.latitude}`);
-  console.log(`Longitude: ${crd.longitude}`);
-  console.log(`More or less ${crd.accuracy} meters.`);
-};
+/* SECOND: Are there any saved locations??? */
+if ('myLocals' in localStorage) {
+  console.log("yes, there is something in storage!");
+  myLocals = JSON.parse(localStorage.getItem("myLocals"));
+  initialRender(myLocals)
+}
+else {
+  debugger
+  console.log('no locations in storage, getting location now...');
+  if (!currentLocation) {
+    document.addEventListener('currentLocationUpdated', function namedFunc(){
+      transferCurrentLocation(0, currentLocation);
+      initialRender(myLocals);
+      document.removeEventListener('currentLocationUpdated', namedFunc);
+    });
+  }
+  else {
+    transferCurrentLocation(0, currentLocation);
+    initialRender(myLocals);
+  }
+}
 
-//get current location, then get current weather
-fetch('https://freegeoip.net/json/?callback=')
+function transferCurrentLocation(index, current) {
+  console.log('current local: ', current);
+  myLocals[index] = current;
+}
+
+function initialRender(myLocals){
+  for (let i=0; i<3; i++) {
+    if (i < myLocals.length) {
+      let index = i;
+      getWeather(myLocals[i], i)
+      .then(()=>renderWeather(index));
+    }
+    else
+      renderBlankCard(i);
+  }
+}
+
+function getCurrentPosition() {
+  console.warn('Location may be innacurate if on mobile network');
+  fetch('https://freegeoip.net/json/?callback=')
   .then(resp => {
     return resp.json();
   }).then(json => {
-    //console.log(json);
-    debugger
-    myLocals[0] = saveLocal(json);
-    //console.log(myLocal)
-    localStorage.setItem("myLocal", JSON.stringify(myLocals));
-    getWeather(myLocals[0], 0);
-    renderBlankCard(1);
-    renderDownloadCard(2);
+    currentLocation = {
+      lat: json.latitude,
+      long: json.longitude,
+      city: json.city,
+      state: json.region_code
+    }
+    document.dispatchEvent(currentLocationUpdated);
   }).catch(err => {
     console.error(err);
     console.warn("trouble getting location")
-    myLocals = JSON.parse(localStorage.getItem("myLocal"));
-    if (myLocals === null) {
-      console.err("no location saved in storage")
-    }
-    else {
-      console.warn("your last saved location is " + myLocals[0].city)
-      getWeather(myLocals[0], 0);
-      renderBlankCard(1);
-      renderBlankCard(2);
-    }
   });
-
-function saveLocal(json){
-  return {
-    lat: json.latitude,
-    long: json.longitude,
-    city: json.city,
-    state: json.region_code
-  };
 }
 
-function getWeather(myLocal, index){
+async function getCurrentPositionCallback(pos) {
+  getCity(pos.coords.latitude, pos.coords.longitude)
+  .then(data=>{
+    currentLocation = {
+      lat: pos.coords.latitude,
+      long: pos.coords.longitude,
+      city: data.address.city,
+      state: data.address.state
+    }
+    document.dispatchEvent(currentLocationUpdated);
+  }).catch(err => {
+    console.error(err);
+    console.warn("trouble getting location")
+  });
+}
+
+async function getCity(lat, long){
+  var path = 'location/reverse/'
+  var url = appUrl + path + lat + ',' + long;
+  resp = await fetch(url);
+  json = await resp.json();
+  console.log(json);
+  return json;
+}
+
+async function getWeather(myLocal, index){
   console.log(myLocal)
-  var prodUrl = 'https://devins-weather-app.herokuapp.com/';
-  var devUrl = 'http://localhost:5000/';
   var path = 'weather/'
-  var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
+  var url = appUrl + path + myLocal.lat + ',' + myLocal.long;
 
   // for testing only
   // weather[index] = testJson;
-  // renderWeather(index);
-  fetch(url)
-  .then(resp => {
-    return resp.json();
-  }).then(json => {
-    console.log (json)
-    weather[index] = json;
-    renderWeather(index);
-  }).catch(err => {
-    console.error(err);
-  });
+  var resp = await fetch(url);
+  var json = await resp.json();
+  weather[index] = await json;
 }
 
 window.addEventListener('keydown', e => {
@@ -106,39 +155,45 @@ window.addEventListener('keydown', e => {
 })
 
 function rotateLeft (cards) {
-  // console.log(cards)
-  return {
-    a: {
-      rotation: normalizePos(cards.a.position) === 2 ? cards.a.rotation : cards.a.rotation -180,
-      position: cards.a.position - 1
-    },
-    b: {
-      rotation: normalizePos(cards.b.position) === 2 ? cards.b.rotation : cards.b.rotation -180,
-      position: cards.b.position - 1
-    },
-    c: {
-      rotation: normalizePos(cards.c.position) === 2 ? cards.c.rotation : cards.c.rotation -180,
-      position: cards.c.position - 1
+  console.log(cards)
+  if (myLocals.length + cards.a.position > 0) {
+    return {
+      a: {
+        rotation: normalizePos(cards.a.position) === 2 ? cards.a.rotation : cards.a.rotation -180,
+        position: cards.a.position - 1
+      },
+      b: {
+        rotation: normalizePos(cards.b.position) === 2 ? cards.b.rotation : cards.b.rotation -180,
+        position: cards.b.position - 1
+      },
+      c: {
+        rotation: normalizePos(cards.c.position) === 2 ? cards.c.rotation : cards.c.rotation -180,
+        position: cards.c.position - 1
+      }
     }
-  };
+  }
+  else return cards;
 }
 
 function rotateRight (cards) {
-  // console.log(cards)
-  return {
-    a: {
-      rotation: normalizePos(cards.a.position) === 1 ? cards.a.rotation : cards.a.rotation +180,
-      position: cards.a.position + 1
-    },
-    b: {
-      rotation: normalizePos(cards.b.position) === 1 ? cards.b.rotation : cards.b.rotation +180,
-      position: cards.b.position + 1
-    },
-    c: {
-      rotation: normalizePos(cards.c.position)=== 1 ? cards.c.rotation : cards.c.rotation +180,
-      position: cards.c.position + 1
+  console.log(cards)
+  if (myLocals.length + cards.a.position < myLocals.length) {
+    return {
+      a: {
+        rotation: normalizePos(cards.a.position) === 1 ? cards.a.rotation : cards.a.rotation +180,
+        position: cards.a.position + 1
+      },
+      b: {
+        rotation: normalizePos(cards.b.position) === 1 ? cards.b.rotation : cards.b.rotation +180,
+        position: cards.b.position + 1
+      },
+      c: {
+        rotation: normalizePos(cards.c.position)=== 1 ? cards.c.rotation : cards.c.rotation +180,
+        position: cards.c.position + 1
+      }
     }
-  };
+  }
+  else return cards;
 }
 
 function updateCardsInDOM (c) {
@@ -148,7 +203,7 @@ function updateCardsInDOM (c) {
     card = document.querySelector(`#${key}`);
     card.classList.remove('left', 'right', 'front');
     card.classList.add(`${numToPos(c[key].position)}`);
-    console.log(c[key].rotation)
+    //console.log(c[key].rotation)
     card.style.transform = `rotateY(${c[key].rotation}deg)`;
   }
 }
@@ -243,7 +298,6 @@ function renderWeeklyDownload(card) {
 }
 
 function renderWeather(index) {
-  debugger
   var cardId = indexToCard(index);
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
@@ -307,18 +361,22 @@ function getHour(ms) {
   return (hour%12 === 0 ? '12' : hour%12) + (hour>12?' PM': ' AM');
 }
 
-document.querySelector('.slider').addEventListener('input', (e) => {
-  console.log(e)
-  var card = e.target.parentNode.parentNode
-  var h = e.target.value
-  renderHourly(card, 0, h)
-})
+var sliders = document.querySelectorAll('.slider');
+
+for (let i=0; i<sliders.length; i++) {
+  sliders[i].addEventListener('input', (e) => {
+    //console.log(e)
+    var card = e.target.parentNode.parentNode
+    var h = e.target.value
+    renderHourly(card, 0, h)
+  })
+}
 
 document.addEventListener("touchstart", (e)=> {
   if (!e.target.classList.contains('slider')) {
     document.addEventListener("touchmove", onTouchMove)
   }
-  console.log(e)
+  //console.log(e)
   touchStart = {
     x: e.changedTouches[0].clientX,
     time: e.timeStamp
@@ -329,7 +387,7 @@ function onTouchMove (e) {
   var x = e.changedTouches[0].clientX;
   var time = e.timeStamp;
   var velocity = (x-touchStart.x)/(time-touchStart.time);
-  console.log(velocity)
+  //console.log(velocity)
   if (velocity > .5) {
     cards = rotateRight(cards);
     updateCardsInDOM(cards);
@@ -361,4 +419,4 @@ var testJson = {
   "apparentTemperatureLowTime":1519826400,"dewPoint":16.54,"humidity":0.63,"pressure":1021.02,"windSpeed":2.84,"windGust":8.91,"windGustTime":1519754400,"windBearing":301,"cloudCover":0.74,"uvIndex":2,"uvIndexTime":1519754400,"ozone":401.8,"temperatureMin":18.73,"temperatureMinTime":1519797600,"temperatureMax":31.69,"temperatureMaxTime":1519772400,"apparentTemperatureMin":18.73,"apparentTemperatureMinTime":1519797600,"apparentTemperatureMax":29.23,"apparentTemperatureMaxTime":1519714800},{"time":1519801200,"summary":"Mostly cloudy throughout the day.","icon":"partly-cloudy-day","sunriseTime":1519826643,"sunsetTime":1519867149,"moonPhase":0.46,"precipIntensity":0.0035,"precipIntensityMax":0.0076,"precipIntensityMaxTime":1519840800,"precipProbability":0.16,"precipAccumulation":1.032,"precipType":"snow","temperatureHigh":31.84,"temperatureHighTime":1519858800,"temperatureLow":13.93,"temperatureLowTime":1519912800,"apparentTemperatureHigh":26.36,"apparentTemperatureHighTime":1519862400,"apparentTemperatureLow":5.21,"apparentTemperatureLowTime":1519912800,"dewPoint":11.04,"humidity":0.62,"pressure":1026.15,"windSpeed":1.42,"windGust":15.14,"windGustTime":1519855200,"windBearing":195,"cloudCover":0.84,"uvIndex":2,"uvIndexTime":1519840800,"ozone":400.76,"temperatureMin":14.44,"temperatureMinTime":1519815600,"temperatureMax":31.84,"temperatureMaxTime":1519858800,"apparentTemperatureMin":7.09,"apparentTemperatureMinTime":1519826400,"apparentTemperatureMax":26.36,"apparentTemperatureMaxTime":1519862400},{"time":1519887600,"summary":"Partly cloudy until evening.","icon":"partly-cloudy-day","sunriseTime":1519912951,"sunsetTime":1519953617,"moonPhase":0.49,"precipIntensity":0.0003,"precipIntensityMax":0.0023,"precipIntensityMaxTime":1519887600,"precipProbability":0.1,"precipAccumulation":0.104,"precipType":"snow","temperatureHigh":37.29,"temperatureHighTime":1519945200,"temperatureLow":21.94,"temperatureLowTime":1519984800,"apparentTemperatureHigh":37.29,"apparentTemperatureHighTime":1519945200,"apparentTemperatureLow":13.17,"apparentTemperatureLowTime":1519984800,"dewPoint":11.86,"humidity":0.57,"pressure":1027.13,"windSpeed":3.56,"windGust":17.14,"windGustTime":1519934400,"windBearing":145,"cloudCover":0.44,"uvIndex":3,"uvIndexTime":1519930800,"ozone":399.31,"temperatureMin":13.93,"temperatureMinTime":1519912800,"temperatureMax":37.29,"temperatureMaxTime":1519945200,"apparentTemperatureMin":5.21,"apparentTemperatureMinTime":1519912800,"apparentTemperatureMax":37.29,"apparentTemperatureMaxTime":1519945200},{"time":1519974000,"summary":"Mostly cloudy throughout the day.","icon":"partly-cloudy-day","sunriseTime":1519999259,"sunsetTime":1520040085,"moonPhase":0.53,"precipIntensity":0.0015,"precipIntensityMax":0.0051,"precipIntensityMaxTime":1520017200,"precipProbability":0.09,"precipAccumulation":0.106,"precipType":"snow","temperatureHigh":43.55,"temperatureHighTime":1520031600,"temperatureLow":31.03,"temperatureLowTime":1520085600,"apparentTemperatureHigh":39.71,"apparentTemperatureHighTime":1520035200,"apparentTemperatureLow":24,"apparentTemperatureLowTime":1520085600,"dewPoint":19.33,"humidity":0.59,"pressure":1021.24,"windSpeed":7.17,"windGust":24.25,"windGustTime":1520013600,"windBearing":145,"cloudCover":0.64,"uvIndex":2,"uvIndexTime":1520013600,"ozone":379.22,"temperatureMin":21.94,"temperatureMinTime":1519984800,"temperatureMax":43.55,"temperatureMaxTime":1520031600,"apparentTemperatureMin":13.17,"apparentTemperatureMinTime":1519984800,"apparentTemperatureMax":39.71,"apparentTemperatureMaxTime":1520035200}]},"alerts":[{"title":"Winter Weather Advisory","regions":["Great Salt Lake Desert and Mountains","Northern Wasatch Front","Salt Lake and Tooele Valleys","Southern Wasatch Front","Southwest Utah","West Central Utah"],"severity":"advisory","time":1519414020,"expires":1519430400,"description":"...WINTER WEATHER ADVISORY REMAINS IN EFFECT UNTIL 5 PM MST THIS AFTERNOON... * WHAT...Snow. Additional snow accumulations of up to one inch, with localized amounts up to 2 inches, are expected. * WHERE...Northern Wasatch Front, Salt Lake and Tooele Valleys, Southern Wasatch Front, Great Salt Lake Desert and Mountains, West Central Utah and Southwest Utah. * WHEN...Until 5 PM MST this afternoon. * ADDITIONAL DETAILS...Plan on slippery road conditions. Be prepared for reduced visibilities at times.\n","uri":"https://alerts.weather.gov/cap/wwacapget.php?x=UT125A9308EE7C.WinterWeatherAdvisory.125A93154000UT.SLCWSWSLC.b886c2096870663a551c19dd11e81a90"}],"flags":{"sources":["isd","nearest-precip","nwspa","cmc","gfs","hrrr","madis","nam","sref","darksky"],"isd-stations":["724725-99999","725720-24127","725724-24174","725724-99999","725750-24126","725753-99999","725755-24101","725755-99999","725775-04111","725814-99999","725816-99999","740030-24103","740030-99999","999999-04133","999999-24126","999999-24175"],"units":"us"},
   "offset":-7
 }
-console.log(testJson);
+//console.log(testJson);
