@@ -26,6 +26,8 @@ fetch('https://freegeoip.net/json/?callback=')
     //console.log(myLocal)
     localStorage.setItem("myLocal", JSON.stringify(myLocals));
     getWeather(myLocals[0], 0);
+    renderBlankCard(1);
+    renderBlankCard(2);
   }).catch(err => {
     console.error(err);
     console.warn("trouble getting location")
@@ -36,6 +38,8 @@ fetch('https://freegeoip.net/json/?callback=')
     else {
       console.warn("your last saved location is " + myLocals[0].city)
       getWeather(myLocals[0], 0);
+      renderBlankCard(1);
+      renderBlankCard(2);
     }
   });
 
@@ -56,18 +60,18 @@ function getWeather(myLocal, index){
   var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
 
   // for testing only
-  // weather[index] = testJson;
-  // renderWeather(index);
-  fetch(url)
-  .then(resp => {
-    return resp.json();
-  }).then(json => {
-    console.log (json)
-    weather[index] = json;
-    renderWeather(index);
-  }).catch(err => {
-    console.error(err);
-  });
+  weather[index] = testJson;
+  renderWeather(index);
+  // fetch(url)
+  // .then(resp => {
+  //   return resp.json();
+  // }).then(json => {
+  //   console.log (json)
+  //   weather[index] = json;
+  //   renderWeather(index);
+  // }).catch(err => {
+  //   console.error(err);
+  // });
 }
 
 window.addEventListener('keydown', e => {
@@ -127,7 +131,7 @@ function updateCardsInDOM (c) {
     card.classList.remove('left', 'right', 'front');
     card.classList.add(`${numToPos(c[key].position)}`);
     console.log(c[key].rotation)
-    card.style.transform = `rotateY(${c[key].rotation}deg)`
+    card.style.transform = `rotateY(${c[key].rotation}deg)`;
   }
 }
 
@@ -156,12 +160,43 @@ function numToPos (num) {
   }
   return pos;
 }
+function renderBlankCard(index) {
+  var cardId = indexToCard(index);
+  var card = document.getElementById(cardId);
+  card.querySelector('.city').value = '';
+  card.querySelector('.city').placeholder = 'Enter Location';
+  card.querySelector('.city').style.pointerEvents = 'all';
+  card.querySelector('.city').style.cursor = 'text';
+  card.querySelector('.todays-forecast .forecast').innerText = '';
+  card.querySelector('.week-forecast .forecast').innerText = '';
+  renderHourlyBlank(card);//TODO
+  renderWeeklyBlank(card);
+}
+function renderHourlyBlank(card) {
+  card.querySelector('.summary .day').innerText = getShortDay(new Date());
+  card.querySelector('.summary .time').innerText = getHour(new Date());
+  card.querySelector('.summary .weather-summary').innerText = '';
+  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon`;
+  card.querySelector('.todays-forecast .temp').innerText = '--';
+  card.querySelector('.todays-forecast .precip').innerText = '--';
+  card.querySelector('.todays-forecast .humidity').innerText = '--';
+  card.querySelector('.todays-forecast .windSpeed').innerText = '--';
+}
+function renderWeeklyBlank(card) {
+  var li = card.querySelectorAll('.week li');
+  var today = new Date();
+  for (let index=0; index<li.length; index++) {
+    li[index].querySelector('.day').innerText = getDay(today.setDate(today.getDate()+(index*1)));
+    li[index].querySelector('.weather-icon').className = `weather-icon`;
+    li[index].querySelector('.temp .hi').innerText = '--';
+    li[index].querySelector('.temp .lo').innerText = '--';
+  }
+}
 
 function renderWeather(index) {
   var cardId = indexToCard(index);
   var card = document.getElementById(cardId);
-  console.log(card)
-  card.querySelector('.city').innerText = myLocals[index].city;
+  card.querySelector('.city').value = myLocals[index].city;
   card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
   renderHourly(card, index, 0);//TODO
@@ -169,8 +204,8 @@ function renderWeather(index) {
 }
 
 function renderHourly(card, index, h) {
-  card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time);
-  card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time);
+  card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time*1000);
+  card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time*1000);
   card.querySelector('.summary .weather-summary').innerText = weather[index].hourly.data[h].summary;
   card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${weather[index].hourly.data[h].icon}`;
   card.querySelector('.todays-forecast .temp').innerText = Math.round(weather[index].hourly.data[h].temperature);
@@ -181,7 +216,7 @@ function renderHourly(card, index, h) {
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
   weather[index].daily.data.forEach((day, index)=> {
-    li[index].querySelector('.day').innerText = getDay(day.time);
+    li[index].querySelector('.day').innerText = getDay(day.time*1000);
     li[index].querySelector('.weather-icon').className = `weather-icon ${day.icon}`;
     li[index].querySelector('.temp .hi').innerText = Math.round(day.temperatureHigh);
     li[index].querySelector('.temp .lo').innerText = Math.round(day.temperatureLow);
@@ -205,19 +240,19 @@ function indexToCard(index) {
   return card
 }
 
-function getDay(seconds) {
+function getDay(ms) {
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  var d = new Date(seconds*1000);
+  var d = new Date(ms);
   var day = d.getDay();
   return days[day];
 }
 
-function getShortDay(seconds) {
-  return getDay(seconds).slice(0,3);
+function getShortDay(ms) {
+  return getDay(ms).slice(0,3);
 }
 
-function getHour(seconds) {
-  var d = new Date(seconds*1000);
+function getHour(ms) {
+  var d = new Date(ms);
   var hour = d.getHours();
   return (hour%12 === 0 ? '12' : hour%12) + (hour>12?' PM': ' AM');
 }

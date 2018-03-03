@@ -74,6 +74,11 @@ body {
   grid-column: 1 / 4;
   font-size: 3rem;
   margin-top:1rem;
+  border: none;
+}
+.filled {
+  pointer-events: none;
+  cursor: pointer;
 }
 .summary {
   grid-row: 2;
@@ -108,7 +113,7 @@ body {
 .details  .precip::after {
   content: '%';
 }
-.details .wind::after {
+.details .windSpeed::after {
   content: 'mph';
 }
 .forecast {
