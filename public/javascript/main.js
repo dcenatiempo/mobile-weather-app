@@ -35,6 +35,7 @@ function success(pos) {
   currentLocation.long = pos.coords.longitude;
   currentLocation.city = data.address.city;
   currentLocation.state = data.address.state;
+  //test
 }
 
 async function getCity(lat, long){
