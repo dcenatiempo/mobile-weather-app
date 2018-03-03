@@ -1,3 +1,7 @@
+var prodUrl = 'https://devins-weather-app.herokuapp.com/';
+var devUrl = 'http://localhost:5000/';
+var appUrl = devUrl;
+
 var currentLocation ={};  // current location
 var myLocals = [];        // array of saved locations
 var weather = [];         // array of weather corresponding to myLocals
@@ -25,14 +29,55 @@ if ("geolocation" in navigator) {
   console.log('location not available')
 }
 function success(pos) {
-  var crd = pos.coords;
-  console.log(pos)
+  currentLocation.lat = pos.coords.latitude;
+  currentLocation.long = pos.coords.longitude;
+  console.log(getCity(pos.coords.latitude, pos.coords.longitude))
+}
 
-  console.log('Your current position is:');
-  console.log(`Latitude : ${crd.latitude}`);
-  console.log(`Longitude: ${crd.longitude}`);
-  console.log(`More or less ${crd.accuracy} meters.`);
-};
+async function getCity(lat, long){
+  var path = 'location/'
+  var url = appUrl + path + lat + ',' + long;
+
+  resp = await fetch(url);
+  json = await resp.json();
+  console.log(json);
+  return json;
+}
+
+function getWeather(myLocal, index){
+  console.log(myLocal)
+  var path = 'weather/'
+  var url = appUrl + path + myLocal.lat + ',' + myLocal.long;
+
+  // for testing only
+  // weather[index] = testJson;
+  // renderWeather(index);
+  fetch(url)
+  .then(resp => {
+    return resp.json();
+  }).then(json => {
+    console.log (json)
+    weather[index] = json;
+    renderWeather(index);
+  }).catch(err => {
+    console.error(err);
+  });
+}
+
+function getLocal(){
+  var url = 'https://freegeoip.net/json/?callback=';
+  
+  fetch(url)
+  .then(resp => {
+    return resp.json();
+  }).then(json => {
+    console.log(json);
+  }).catch(err => {
+    console.error(err);
+    console.warn("trouble getting location")
+    myLocals = JSON.parse(localStorage.getItem("myLocal"));
+  });
+}
 
 //get current location, then get current weather
 fetch('https://freegeoip.net/json/?callback=')
@@ -69,28 +114,6 @@ function saveLocal(json){
     city: json.city,
     state: json.region_code
   };
-}
-
-function getWeather(myLocal, index){
-  console.log(myLocal)
-  var prodUrl = 'https://devins-weather-app.herokuapp.com/';
-  var devUrl = 'http://localhost:5000/';
-  var path = 'weather/'
-  var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
-
-  // for testing only
-  // weather[index] = testJson;
-  // renderWeather(index);
-  fetch(url)
-  .then(resp => {
-    return resp.json();
-  }).then(json => {
-    console.log (json)
-    weather[index] = json;
-    renderWeather(index);
-  }).catch(err => {
-    console.error(err);
-  });
 }
 
 window.addEventListener('keydown', e => {
