@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = devUrl;
+var appUrl = prodUrl;
 
 var currentLocation = null;  // current location
 var myLocals = [];        // array of saved locations
@@ -366,7 +366,6 @@ function getHour(ms) {
 }
 
 var sliders = document.querySelectorAll('.slider');
-
 for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
     //console.log(e)
@@ -374,6 +373,39 @@ for (let i=0; i<sliders.length; i++) {
     var h = e.target.value
     renderHourly(card, 0, h)
   })
+}
+
+var cityInput = document.querySelectorAll('.city');
+for (let i=0; i<cityInput.length; i++) {
+  cityInput[i].addEventListener('blur', async e => {
+    let resp = await forwardLookup(e.target.value);
+    handleForwardLookup(resp);
+  });
+  cityInput[i].addEventListener('keypress', async e => {
+    if (e.keyCode === 13) {
+      let resp = await forwardLookup(e.target.value);
+      handleForwardLookup(resp);
+    }
+  })
+}
+
+//TODO: handle new city
+function handleForwardLookup(resp) {
+  if ("error" in resp) {
+    console.log("try again")
+  }
+  else {
+    console.log("successfully added new location")
+  }
+}
+
+async function forwardLookup(city) {
+  console.log('getting forward geo')
+  var path = 'location/forward/'
+  var url = appUrl + path + city;
+  resp = await fetch(url);
+  json = await resp.json();
+  return json;
 }
 
 document.addEventListener("touchstart", (e)=> {

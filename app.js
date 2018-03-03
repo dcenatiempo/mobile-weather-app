@@ -55,5 +55,21 @@ async function forwardGeo(local){
   let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${local}&format=json`;
   let response = await fetch(url);
   let data = await response.json();
-  return data;
+  let length = data.length;
+  for (let i=0; i<length; i++) {
+    if (data[i].display_name.indexOf('United States of America') > 0) {
+      data = data[i].lat + ',' + data[i].lon;
+      i = length;
+    }
+  }
+  if (typeof data === "string") {
+    let geo = await reverseGeo(data)
+    return {
+      "lat": geo.lat,
+      "long": geo.lon,
+      "city": geo.address.city,
+      "state": geo.address.state
+    };
+  }
+  else return { "error": "invalid search"}
 }
