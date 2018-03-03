@@ -28,8 +28,8 @@ if ("geolocation" in navigator) {
   /* geolocation IS NOT available */
   console.log('location not available')
 }
-function success(pos) {
-  var data = getCity(pos.coords.latitude, pos.coords.longitude);
+async function success(pos) {
+  var data = await getCity(pos.coords.latitude, pos.coords.longitude);
 
   currentLocation.lat = pos.coords.latitude;
   currentLocation.long = pos.coords.longitude;
@@ -89,7 +89,6 @@ fetch('https://freegeoip.net/json/?callback=')
     return resp.json();
   }).then(json => {
     //console.log(json);
-    debugger
     myLocals[0] = saveLocal(json);
     //console.log(myLocal)
     localStorage.setItem("myLocal", JSON.stringify(myLocals));
@@ -271,7 +270,6 @@ function renderWeeklyDownload(card) {
 }
 
 function renderWeather(index) {
-  debugger
   var cardId = indexToCard(index);
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
