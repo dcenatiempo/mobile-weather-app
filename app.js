@@ -18,10 +18,14 @@ app.get('/weather/:geo', async (req, res) => {
   let coords = req.params.geo;
   res.json(await getWeather(coords));
 });
-app.get('/location/:local', async (req, res) => {
+app.get('/location/reverse/:local', async (req, res) => {
   let local = req.params.local;
-  res.json(await getLocal(local));
-})
+  res.json(await reverseGeo(local));
+});
+app.get('/location/forward/:local', async (req, res) => {
+  let local = req.params.local;
+  res.json(await forwardGeo(local));
+});
 
 const server = app.listen(PORT, () => {
   console.log(`Listening on ${ PORT }`);
@@ -37,7 +41,15 @@ async function getWeather(myLocal){
 }
 
 //https://locationiq.org/
-async function getLocal(local){
+async function reverseGeo(local){
+  const apiKey = '94be5df0e46402';
+  let url = `https://us1.locationiq.org/v1/reverse.php?key=${apiKey}&q=${local}&format=json`;
+  let response = await fetch(url);
+  let data = await response.json();
+  return data;
+}
+
+async function forwardGeo(local){
   const apiKey = '94be5df0e46402';
   let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${local}&format=json`;
   let response = await fetch(url);

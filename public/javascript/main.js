@@ -29,13 +29,14 @@ if ("geolocation" in navigator) {
   console.log('location not available')
 }
 function success(pos) {
+
   currentLocation.lat = pos.coords.latitude;
   currentLocation.long = pos.coords.longitude;
   console.log(getCity(pos.coords.latitude, pos.coords.longitude))
 }
 
 async function getCity(lat, long){
-  var path = 'location/'
+  var path = 'location/reverse/'
   var url = appUrl + path + lat + ',' + long;
 
   resp = await fetch(url);
