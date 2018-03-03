@@ -15,6 +15,23 @@ var cards = {
     position: 2 //'left'
   }
 }
+debugger
+if ("geolocation" in navigator) {
+  /* geolocation is available */
+  console.log('location available')
+  navigator.geolocation.getCurrentPosition(success);
+} else {
+  /* geolocation IS NOT available */
+  console.log('location not available')
+}
+function success(pos) {
+  var crd = pos.coords;
+
+  console.log('Your current position is:');
+  console.log(`Latitude : ${crd.latitude}`);
+  console.log(`Longitude: ${crd.longitude}`);
+  console.log(`More or less ${crd.accuracy} meters.`);
+};
 
 //get current location, then get current weather
 fetch('https://freegeoip.net/json/?callback=')
@@ -22,12 +39,13 @@ fetch('https://freegeoip.net/json/?callback=')
     return resp.json();
   }).then(json => {
     //console.log(json);
+    debugger
     myLocals[0] = saveLocal(json);
     //console.log(myLocal)
     localStorage.setItem("myLocal", JSON.stringify(myLocals));
     getWeather(myLocals[0], 0);
     renderBlankCard(1);
-    renderBlankCard(2);
+    renderDownloadCard(2);
   }).catch(err => {
     console.error(err);
     console.warn("trouble getting location")
@@ -60,18 +78,18 @@ function getWeather(myLocal, index){
   var url = prodUrl + path + myLocal.lat + ',' + myLocal.long;
 
   // for testing only
-  weather[index] = testJson;
-  renderWeather(index);
-  // fetch(url)
-  // .then(resp => {
-  //   return resp.json();
-  // }).then(json => {
-  //   console.log (json)
-  //   weather[index] = json;
-  //   renderWeather(index);
-  // }).catch(err => {
-  //   console.error(err);
-  // });
+  // weather[index] = testJson;
+  // renderWeather(index);
+  fetch(url)
+  .then(resp => {
+    return resp.json();
+  }).then(json => {
+    console.log (json)
+    weather[index] = json;
+    renderWeather(index);
+  }).catch(err => {
+    console.error(err);
+  });
 }
 
 window.addEventListener('keydown', e => {
@@ -165,8 +183,7 @@ function renderBlankCard(index) {
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = '';
   card.querySelector('.city').placeholder = 'Enter Location';
-  card.querySelector('.city').style.pointerEvents = 'all';
-  card.querySelector('.city').style.cursor = 'text';
+  card.querySelector('.city').classList.remove('filled');
   card.querySelector('.todays-forecast .forecast').innerText = '';
   card.querySelector('.week-forecast .forecast').innerText = '';
   renderHourlyBlank(card);//TODO
@@ -193,7 +210,40 @@ function renderWeeklyBlank(card) {
   }
 }
 
+function renderDownloadCard(index) {
+  var cardId = indexToCard(index);
+  var card = document.getElementById(cardId);
+  card.querySelector('.city').value = '';
+  card.querySelector('.city').style.pointerEvents = 'none';
+  card.querySelector('.city').style.cursor = 'text';
+  card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
+  card.querySelector('.week-forecast .forecast').innerText = 'Getting weather...';
+  renderHourlyDownload(card);//TODO
+  renderWeeklyDownload(card);
+}
+function renderHourlyDownload(card) {
+  card.querySelector('.summary .day').innerText = getShortDay(new Date());
+  card.querySelector('.summary .time').innerText = getHour(new Date());
+  card.querySelector('.summary .weather-summary').innerText = 'Getting weather';
+  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon unknown`;
+  card.querySelector('.todays-forecast .temp').innerText = '--';
+  card.querySelector('.todays-forecast .precip').innerText = '--';
+  card.querySelector('.todays-forecast .humidity').innerText = '--';
+  card.querySelector('.todays-forecast .windSpeed').innerText = '--';
+}
+function renderWeeklyDownload(card) {
+  var li = card.querySelectorAll('.week li');
+  var today = new Date();
+  for (let index=0; index<li.length; index++) {
+    li[index].querySelector('.day').innerText = getDay(today.setDate(today.getDate()+(index*1)));
+    li[index].querySelector('.weather-icon').className = `weather-icon unknown`;
+    li[index].querySelector('.temp .hi').innerText = '--';
+    li[index].querySelector('.temp .lo').innerText = '--';
+  }
+}
+
 function renderWeather(index) {
+  debugger
   var cardId = indexToCard(index);
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
