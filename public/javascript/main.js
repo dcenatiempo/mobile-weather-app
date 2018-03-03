@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = devUrl;
+var appUrl = prodUrl;
 
 var currentLocation ={};  // current location
 var myLocals = [];        // array of saved locations
