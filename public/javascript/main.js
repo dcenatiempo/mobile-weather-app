@@ -26,11 +26,16 @@ if ("geolocation" in navigator) {
   // use geolocation API
   navigator.geolocation.getCurrentPosition(getCurrentPositionCallback);
   // check to see if permission denied
-  navigator.permissions.query({name:'geolocation'})
-  .then(resp =>{
-    if (resp.state === "denied")
-      getCurrentPosition();
-  });
+  try{
+    navigator.permissions.query({name:'geolocation'})
+    .then(resp =>{
+      if (resp.state === "denied")
+        getCurrentPosition();
+    });
+  }
+  catch(e){
+    getCurrentPosition()
+  }
 } else {
   getCurrentPosition();
 }
@@ -42,6 +47,7 @@ if ('myLocals' in localStorage) {
   initialRender(myLocals)
 }
 else {
+  debugger
   console.log('no locations in storage, getting location now...');
   if (!currentLocation) {
     document.addEventListener('currentLocationUpdated', function namedFunc(){
