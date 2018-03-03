@@ -34,10 +34,13 @@ if ("geolocation" in navigator) {
     });
   }
   catch(e){
+    // In safari, this will always catch
+    // Wait to see if geolocation API works,
+    //   if not, use alternate geo API
     setTimeout(()=>{
       if (!currentLocation)
       getCurrentPosition();
-    },5000);
+    },1000);
   }
 } else {
   getCurrentPosition();
