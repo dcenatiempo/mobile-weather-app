@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 var currentLocation = null;  // current location
 var myLocals = [];        // array of saved locations
@@ -245,7 +245,7 @@ function renderBlankCard(index) {
   card.querySelector('.city').classList.remove('filled');
   card.querySelector('.todays-forecast .forecast').innerText = '';
   card.querySelector('.week-forecast .forecast').innerText = '';
-  renderHourlyBlank(card);//TODO
+  renderHourlyBlank(card);
   renderWeeklyBlank(card);
 }
 function renderHourlyBlank(card) {
@@ -277,7 +277,7 @@ function renderDownloadCard(index) {
   card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
   card.querySelector('.week-forecast .forecast').innerText = 'Getting weather...';
-  renderHourlyDownload(card);//TODO
+  renderHourlyDownload(card);
   renderWeeklyDownload(card);
 }
 function renderHourlyDownload(card) {
@@ -305,11 +305,13 @@ function renderWeather(index) {
   var cardId = indexToCard(index);
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
+  card.querySelector('.city').classList.add('filled');
   card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
-  renderHourly(card, index, 0);//TODO
+  renderHourly(card, index, 0);
   renderWeekly(card, index);
 }
+
 
 function renderHourly(card, index, h) {
   card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time*1000);
@@ -348,6 +350,14 @@ function indexToCard(index) {
   return card
 }
 
+function cardToPos(cardId) {
+  return normalizePos(cards[cardId].position);
+}
+function cardToIndex(cardId) {
+  var rotations = cards.a.position;
+  return cards[cardId].position - rotations;
+}
+
 function getDay(ms) {
   var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   var d = new Date(ms);
@@ -378,24 +388,41 @@ for (let i=0; i<sliders.length; i++) {
 var cityInput = document.querySelectorAll('.city');
 for (let i=0; i<cityInput.length; i++) {
   cityInput[i].addEventListener('blur', async e => {
+    if (e.target.value === '') return;
+    if (e.target.disabled === true) return;
+
+    var card = e.target.parentNode.parentNode.id;
+    e.target.disabled = true;
     let resp = await forwardLookup(e.target.value);
-    handleForwardLookup(resp);
+    handleForwardLookup(card, resp);
   });
   cityInput[i].addEventListener('keypress', async e => {
     if (e.keyCode === 13) {
+      if (e.target.value === '') return;
+      var card = e.target.parentNode.parentNode.id;
+      e.target.disabled = true;
       let resp = await forwardLookup(e.target.value);
-      handleForwardLookup(resp);
+      handleForwardLookup(card, resp);
     }
   })
 }
 
 //TODO: handle new city
-function handleForwardLookup(resp) {
+function handleForwardLookup(card, resp) {
+  var index = cardToIndex(card);
+  var pos = cardToPos(card);
   if ("error" in resp) {
     console.log("try again")
+    renderBlankCard(index);
+    var input = document.querySelector(`#${card} .city`);
+    input.disabled = false;
+    input.focus();
   }
   else {
     console.log("successfully added new location")
+    transferCurrentLocation(index, resp);
+    getWeather(myLocals[index], index)
+      .then(()=>renderWeather(index));
   }
 }
 
