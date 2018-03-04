@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 var touchStart;
 var currentLocation = null;  // current location
@@ -232,6 +232,7 @@ function renderBlankCard(cardId) {
   card.querySelector('.city').value = '';
   card.querySelector('.city').placeholder = 'Enter Location';
   card.querySelector('.city').classList.remove('filled');
+  card.querySelector('.city').disabled = false;
   card.querySelector('.todays-forecast .forecast').innerText = '';
   card.querySelector('.week-forecast .forecast').innerText = '';
   renderHourlyBlank(card);
@@ -293,6 +294,7 @@ function renderWeather(cardId, index) {
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
   card.querySelector('.city').classList.add('filled');
+  card.querySelector('.city').disabled = true;
   card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
   renderHourly(card, index, 0);
@@ -426,7 +428,6 @@ for (let i=0; i<cityInput.length; i++) {
   })
 }
 
-//TODO: handle new city
 function handleForwardLookup(card, resp) {
   var rotations = getRotations(cards);
   var frontCardId = findFrontCard(cards);

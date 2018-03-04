@@ -75,12 +75,12 @@ body {
   font-size: 3rem;
   margin-top:1rem;
   border: none;
-  background-color:lightblue
+  background-color: rgb(233, 233, 233);
 }
 .filled {
   pointer-events: none;
   cursor: pointer;
-  background-color: lightgreen;
+  background-color: white;
 }
 .summary {
   grid-row: 2;
