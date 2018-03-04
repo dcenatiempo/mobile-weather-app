@@ -1,6 +1,6 @@
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 var touchStart;
 var currentLocation = null;  // current location
@@ -400,7 +400,7 @@ for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
     var card = e.target.parentNode.parentNode
     var h = e.target.value
-    renderHourly(card, 0, h)
+    renderHourly(card, getRotations(cards), h)
   })
 }
 
