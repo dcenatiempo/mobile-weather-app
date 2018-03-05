@@ -1,7 +1,7 @@
 /** Global State **************************************************************/
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = appUrl;
 
 var touchStart;
 var currentLocation = null;  // current location
@@ -176,6 +176,7 @@ function handleForwardLookup(card, resp) {
     getWeather(myLocals[index])
       .then((w)=>{
         weather[index] = w;
+        sliderPos[index] = "0";
         renderWeather(frontCardId, index)
       });
   }
