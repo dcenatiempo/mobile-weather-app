@@ -7,6 +7,7 @@ var touchStart;
 var currentLocation = null;  // current location
 var myLocals = [];        // array of saved locations
 var weather = [];         // array of weather corresponding to myLocals
+var sliderPos = [];       // array of slider positions, 0-24
 var cards = {             // position of 3 weather cards in DOM
   a: {
     rotation: 0,
@@ -87,15 +88,16 @@ function fetchFirstWeather() {
   getWeather(myLocals[0], 0)
     .then(w => {
       weather[w.index] = w.weather;
+      sliderPos[w.index] = '0';
       renderWeather('a', 0);
     });
 }
 
 async function fetchRemainingWeather(myLocals) {
-  debugger
   for (let i=1; i<myLocals.length; i++) {
     let w = await getWeather(myLocals[i], i)
     weather[w.index] = w.weather;
+    sliderPos[w.index] = '0';
   }
 }
 
@@ -305,6 +307,7 @@ function renderHourlyBlank(card) {
   card.querySelector('.todays-forecast .precip').innerText = '--';
   card.querySelector('.todays-forecast .humidity').innerText = '--';
   card.querySelector('.todays-forecast .windSpeed').innerText = '--';
+  card.querySelector('.slider').value = "0";
 }
 function renderWeeklyBlank(card) {
   var li = card.querySelectorAll('.week li');
@@ -337,6 +340,7 @@ function renderHourlyDownload(card) {
   card.querySelector('.todays-forecast .precip').innerText = '--';
   card.querySelector('.todays-forecast .humidity').innerText = '--';
   card.querySelector('.todays-forecast .windSpeed').innerText = '--';
+  card.querySelector('.slider').value = "0";
 }
 function renderWeeklyDownload(card) {
   var li = card.querySelectorAll('.week li');
@@ -369,6 +373,7 @@ function renderHourly(card, index, h) {
   card.querySelector('.todays-forecast .precip').innerText = Math.round(weather[index].hourly.data[h].precipProbability * 100);
   card.querySelector('.todays-forecast .humidity').innerText = Math.round(weather[index].hourly.data[h].humidity * 100);
   card.querySelector('.todays-forecast .windSpeed').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
+  card.querySelector('.slider').value = sliderPos[index];
 }
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
@@ -400,8 +405,9 @@ var sliders = document.querySelectorAll('.slider');
 for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
     var card = e.target.parentNode.parentNode
-    var h = e.target.value
-    renderHourly(card, getIndex(cards), h)
+    var index = getIndex(cards);
+    sliderPos[index] = e.target.value;
+    renderHourly(card, getIndex(cards), sliderPos[index]);
   })
 }
 
