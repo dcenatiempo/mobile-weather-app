@@ -13,12 +13,8 @@ var cards = {             // position of 3 weather cards in DOM
   },
   b: {
     rotation: 180,
-    position: 1 //'right'
+    position: 1 //'back'
   },
-  c: {
-    rotation: -180,
-    position: 2 //'left'
-  }
 }
 var currentLocationUpdated = new Event('currentLocationUpdated');
 
@@ -168,16 +164,12 @@ function rotateLeft (cards) {
   if (myLocals.length + cards.a.position > 0) {
     return {
       a: {
-        rotation: normalizePos(cards.a.position) === 2 ? cards.a.rotation : cards.a.rotation -180,
+        rotation: cards.a.rotation -180,
         position: cards.a.position - 1
       },
       b: {
-        rotation: normalizePos(cards.b.position) === 2 ? cards.b.rotation : cards.b.rotation -180,
+        rotation: cards.b.rotation -180,
         position: cards.b.position - 1
-      },
-      c: {
-        rotation: normalizePos(cards.c.position) === 2 ? cards.c.rotation : cards.c.rotation -180,
-        position: cards.c.position - 1
       }
     }
   }
@@ -188,16 +180,12 @@ function rotateRight (cards) {
   if (myLocals.length + cards.a.position < myLocals.length) {
     return {
       a: {
-        rotation: normalizePos(cards.a.position) === 1 ? cards.a.rotation : cards.a.rotation +180,
+        rotation: cards.a.rotation +180,
         position: cards.a.position + 1
       },
       b: {
-        rotation: normalizePos(cards.b.position) === 1 ? cards.b.rotation : cards.b.rotation +180,
+        rotation: cards.b.rotation +180,
         position: cards.b.position + 1
-      },
-      c: {
-        rotation: normalizePos(cards.c.position)=== 1 ? cards.c.rotation : cards.c.rotation +180,
-        position: cards.c.position + 1
       }
     }
   }
@@ -221,8 +209,8 @@ function updateCardsInDOM (c) {
   var card;
   for (let key in c) {
     card = document.querySelector(`#${key}`);
-    card.classList.remove('left', 'right', 'front');
-    card.classList.add(`${numToPos(c[key].position)}`);
+    card.classList.remove('front', 'back');
+    card.classList.add(`${posToClass(c[key].position)}`);
     card.style.transform = `rotateY(${c[key].rotation}deg)`;
   }
 }
@@ -301,7 +289,6 @@ function renderWeather(cardId, index) {
   renderWeekly(card, index);
 }
 
-
 function renderHourly(card, index, h) {
   card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time*1000);
   card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time*1000);
@@ -328,54 +315,22 @@ function findFrontCard(cards) {
       return card;
   }
 }
-function normalizePos(num) {
-  var mod = num%3;
+
+function posToClass (num) {
+  var pos = normalizePos(num);
+  return pos === 0 ? 'front' : 'back';
+}
+
+function normalizePos(pos) {
+  var mod = pos%2;
   if (mod < 0) {
     while (mod <0){
-      mod = mod+3
+      mod = mod+2
     }
   }
   return mod;
 }
 
-function numToPos (num) {
-  var pos;
-  switch (normalizePos(num)) {
-    case 0: 
-      pos = 'front';
-      break;
-    case 1:
-      pos = 'right';
-      break;
-    case 2:
-      pos = 'left';
-      break;
-  }
-  return pos;
-}
-function indexToCard(index) {
-  var pos = normalizePos(index);
-  var card;
-  switch (pos) {
-    case 0:
-      card = 'a';
-    break;
-      case 1:
-      card = 'b';
-      break;
-    case 2:
-      card = 'c';
-      break;
-  }
-  return card
-}
-function cardToPos(cardId) {
-  return normalizePos(cards[cardId].position);
-}
-function cardToIndex(cardId) {
-  var rotations = cards.a.position;
-  return cards[cardId].position;
-}
 function getRotations(cards) {
   return Math.abs(cards.a.position);
 }

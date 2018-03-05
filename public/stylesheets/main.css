@@ -29,21 +29,12 @@ body {
   background-color: white;
   transform: rotateY(180deg);
 }
-#c {
-  background-color: white;
-  transform: rotateY(-180deg);
-}
 .front {
   transition: transform .5s, visibility 0s linear .1625s;
   -webkit-transition: transform .5s, visibility 0s linear .1625s;
   visibility: visible;
 }
-.left {
-  transition: transform .5s, visibility 0s linear .1625s;
-  -webkit-transition: transform .5s, visibility 0s linear .1625s;
-   visibility: hidden;
-}
-.right {
+.back {
   transition: transform .5s, visibility 0s linear .1625s;
   -webkit-transition: transform .5s, visibility 0s linear .1625s;
    visibility: hidden;
