@@ -85,20 +85,24 @@ else {
 }
 
 function fetchFirstWeather() {
-  getWeather(myLocals[0], 0)
+  getWeather(myLocals[0])
     .then(w => {
-      weather[w.index] = w.weather;
-      sliderPos[w.index] = '0';
+      weather[0] = w;
+      sliderPos[0] = '0';
       renderWeather('a', 0);
     });
 }
 
 async function fetchRemainingWeather(myLocals) {
-  for (let i=1; i<myLocals.length; i++) {
-    let w = await getWeather(myLocals[i], i)
-    weather[w.index] = w.weather;
-    sliderPos[w.index] = '0';
-  }
+  myLocals.forEach((myLocal, index) => {
+    getWeather(myLocal)
+    .then((data)=>{
+      if (index > 0) {
+        weather[index] = data;
+        sliderPos[index] = '0';
+      }
+    })
+  })
 }
 
 /** REST API calls ************************************************************/
@@ -145,7 +149,7 @@ async function getCity(lat, long){
   return json;
 }
 
-async function getWeather(myLocal, index){
+async function getWeather(myLocal){
   var weather;
   var path = 'weather/'
   var url = appUrl + path + myLocal.lat + ',' + myLocal.long;
@@ -153,7 +157,7 @@ async function getWeather(myLocal, index){
   var resp = await fetch(url);
   var json = await resp.json();
   weather = await json;
-  return { weather, index };
+  return weather;
 }
 
 function handleForwardLookup(card, resp) {
@@ -169,9 +173,9 @@ function handleForwardLookup(card, resp) {
   else {
     console.log("successfully added new location")
     saveLocation(index, resp);
-    getWeather(myLocals[index], index)
+    getWeather(myLocals[index])
       .then((w)=>{
-        weather[w.index] = w.weather;
+        weather[index] = w;
         renderWeather(frontCardId, index)
       });
   }
@@ -361,7 +365,7 @@ function renderWeather(cardId, index) {
   card.querySelector('.city').disabled = true;
   card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
-  renderHourly(card, index, 0);
+  renderHourly(card, index, sliderPos[index]);
   renderWeekly(card, index);
 }
 function renderHourly(card, index, h) {
@@ -373,7 +377,7 @@ function renderHourly(card, index, h) {
   card.querySelector('.todays-forecast .precip').innerText = Math.round(weather[index].hourly.data[h].precipProbability * 100);
   card.querySelector('.todays-forecast .humidity').innerText = Math.round(weather[index].hourly.data[h].humidity * 100);
   card.querySelector('.todays-forecast .windSpeed').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
-  card.querySelector('.slider').value = sliderPos[index];
+  card.querySelector('.slider').value = h;
 }
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
