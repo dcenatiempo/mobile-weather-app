@@ -1,3 +1,4 @@
+/** Global State **************************************************************/
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
 var appUrl = prodUrl;
@@ -15,9 +16,27 @@ var cards = {             // position of 3 weather cards in DOM
     rotation: 180,
     position: 1 //'back'
   },
-}
+};
 var currentLocationUpdated = new Event('currentLocationUpdated');
 
+/** Local Storage *************************************************************/
+function saveLocation(index, current) {
+  myLocals[index] = current;
+  saveToLocalStorage(myLocals);
+}
+
+function saveToLocalStorage(item) {
+  localStorage.setItem('myLocals', JSON.stringify(item))
+}
+
+function loadLocalStorage(item) {
+  if (item in localStorage)
+    return JSON.parse(localStorage.getItem(item));
+  else
+    return [];
+}
+
+/** Program Flow **************************************************************/
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
   // use geolocation API
@@ -44,55 +63,43 @@ if ("geolocation" in navigator) {
 }
 
 /* SECOND: Are there any saved locations??? */
-if ('myLocals' in localStorage) {
-  myLocals = JSON.parse(localStorage.getItem("myLocals"));
-  getWeather(myLocals[0])
-  .then(w => {
-    weather.push(w);
-    renderWeather('a', 0);
-  });
-  getInitialWeather(myLocals);
+myLocals = loadLocalStorage('myLocals');
+if (myLocals.length > 0) {
+  fetchFirstWeather();
+  fetchRemainingWeather(myLocals);
 }
 else {
   console.log('no locations in storage, getting location now...');
   if (!currentLocation) {
     document.addEventListener('currentLocationUpdated', function namedFunc(){
-      transferCurrentLocation(0, currentLocation);
-      getWeather(myLocals[0])
-      .then(w => {
-        weather.push(w);
-        renderWeather('a', 0);
-      });
+      saveLocation(0, currentLocation);
+      fetchFirstWeather();
       document.removeEventListener('currentLocationUpdated', namedFunc);
     });
   }
   else {
-    transferCurrentLocation(0, currentLocation);
-    getWeather(myLocals[0])
-    .then(w => {
-      weather.push(w);
-      renderWeather('a', 0);
-    });
+    saveLocation(0, currentLocation);
+    fetchFirstWeather();
   }
 }
-function getInitialWeather(myLocals) {
+
+function fetchFirstWeather() {
+  getWeather(myLocals[0], 0)
+    .then(w => {
+      weather[w.index] = w.weather;
+      renderWeather('a', 0);
+    });
+}
+
+async function fetchRemainingWeather(myLocals) {
+  debugger
   for (let i=1; i<myLocals.length; i++) {
-    var index = i;
-    getWeather(myLocals[index])
-        .then(w => {
-          weather.push(w);
-        });
-    }
-}
-function transferCurrentLocation(index, current) {
-  myLocals[index] = current;
-  saveToLocalStorage(myLocals);
+    let w = await getWeather(myLocals[i], i)
+    weather[w.index] = w.weather;
+  }
 }
 
-function saveToLocalStorage(item) {
-  localStorage.setItem('myLocals', JSON.stringify(item))
-}
-
+/** REST API calls ************************************************************/
 function getCurrentPosition() {
   console.warn('Location may be innacurate if on mobile network');
   fetch('https://freegeoip.net/json/?callback=')
@@ -136,7 +143,7 @@ async function getCity(lat, long){
   return json;
 }
 
-async function getWeather(myLocal){
+async function getWeather(myLocal, index){
   var weather;
   var path = 'weather/'
   var url = appUrl + path + myLocal.lat + ',' + myLocal.long;
@@ -144,22 +151,84 @@ async function getWeather(myLocal){
   var resp = await fetch(url);
   var json = await resp.json();
   weather = await json;
-  return weather;
+  return { weather, index };
 }
 
-window.addEventListener('keydown', e => {
-  if (e.keyCode === 37) { // rotate left
-    cards = rotateLeft(cards);
-    updateNextCard(cards);
-    updateCardsInDOM(cards);
+function handleForwardLookup(card, resp) {
+  var index = getIndex(cards);
+  var frontCardId = findFrontCard(cards);
+  if ("error" in resp) {
+    console.log("try again")
+    renderBlankCard(frontCardId);
+    var input = document.querySelector(`#${card} .city`);
+    input.disabled = false;
+    input.focus();
   }
-  else if (e.keyCode === 39) { // rotate right
-    cards = rotateRight(cards);
-    updateNextCard(cards);
-    updateCardsInDOM(cards);
+  else {
+    console.log("successfully added new location")
+    saveLocation(index, resp);
+    getWeather(myLocals[index], index)
+      .then((w)=>{
+        weather[w.index] = w.weather;
+        renderWeather(frontCardId, index)
+      });
   }
-})
+}
 
+async function forwardLookup(city) {
+  var path = 'location/forward/'
+  var url = appUrl + path + city;
+  resp = await fetch(url);
+  json = await resp.json();
+  return json;
+}
+
+/** Helper Functions **********************************************************/
+function findFrontCard(cards) {
+  var front;
+  for (card in cards) {
+    if (normalizePos(cards[card].position) === 0)
+      return card;
+  }
+}
+
+function posToClass (num) {
+  var pos = normalizePos(num);
+  return pos === 0 ? 'front' : 'back';
+}
+
+function normalizePos(pos) {
+  var mod = pos%2;
+  if (mod < 0) {
+    while (mod <0){
+      mod = mod+2
+    }
+  }
+  return mod;
+}
+
+function getIndex(cards) {
+  return Math.abs(cards.a.position);
+}
+
+function getDay(ms) {
+  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  var d = new Date(ms);
+  var day = d.getDay();
+  return days[day];
+}
+
+function getShortDay(ms) {
+  return getDay(ms).slice(0,3);
+}
+
+function getHour(ms) {
+  var d = new Date(ms);
+  var hour = d.getHours();
+  return (hour%12 === 0 ? '12' : hour%12) + (hour>12?' PM': ' AM');
+}
+
+/** Card Rotation State *******************************************************/
 function rotateLeft (cards) {
   if (myLocals.length + cards.a.position > 0) {
     return {
@@ -192,29 +261,30 @@ function rotateRight (cards) {
   else return cards;
 }
 
-function updateNextCard(cards) {
-  var rotations = getRotations(cards);
+// Decides wether front card should be blank or weather card
+function updateFrontCard(cards) {
+  var index = getIndex(cards);
   var length = myLocals.length;
   var frontCardId = findFrontCard(cards);
-  if (length - rotations <= 0) {
+  if (length - index <= 0)
     renderBlankCard(frontCardId);
-  }
-  else {
-    renderWeather(frontCardId, rotations);
-  }
-  
+  else
+    renderWeather(frontCardId, index);
 }
 
-function updateCardsInDOM (c) {
+// apply css to animate cards based on card state
+function cardAnimation(cards) {
   var card;
-  for (let key in c) {
+  for (let key in cards) {
     card = document.querySelector(`#${key}`);
     card.classList.remove('front', 'back');
-    card.classList.add(`${posToClass(c[key].position)}`);
-    card.style.transform = `rotateY(${c[key].rotation}deg)`;
+    card.classList.add(`${posToClass(cards[key].position)}`);
+    card.style.transform = `rotateY(${cards[key].rotation}deg)`;
   }
 }
 
+/** Weather Card Rendering ****************************************************/
+// Blank Weather Card
 function renderBlankCard(cardId) {
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = '';
@@ -247,6 +317,7 @@ function renderWeeklyBlank(card) {
   }
 }
 
+// Card Downloading Weather
 function renderDownloadCard(cardId, index) {
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = '';
@@ -278,6 +349,7 @@ function renderWeeklyDownload(card) {
   }
 }
 
+// Card with weather
 function renderWeather(cardId, index) {
   var card = document.getElementById(cardId);
   card.querySelector('.city').value = myLocals[index].city;
@@ -288,7 +360,6 @@ function renderWeather(cardId, index) {
   renderHourly(card, index, 0);
   renderWeekly(card, index);
 }
-
 function renderHourly(card, index, h) {
   card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time*1000);
   card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time*1000);
@@ -308,59 +379,33 @@ function renderWeekly(card, index) {
     li[index].querySelector('.temp .lo').innerText = Math.round(day.temperatureLow);
   })
 }
-function findFrontCard(cards) {
-  var front;
-  for (card in cards) {
-    if (normalizePos(cards[card].position) === 0)
-      return card;
+
+/** Event Listeners ***********************************************************/
+// Rotate with arrow keys
+window.addEventListener('keydown', e => {
+  if (e.keyCode === 37) { // rotate left
+    cards = rotateLeft(cards);
+    updateFrontCard(cards);
+    cardAnimation(cards);
   }
-}
-
-function posToClass (num) {
-  var pos = normalizePos(num);
-  return pos === 0 ? 'front' : 'back';
-}
-
-function normalizePos(pos) {
-  var mod = pos%2;
-  if (mod < 0) {
-    while (mod <0){
-      mod = mod+2
-    }
+  else if (e.keyCode === 39) { // rotate right
+    cards = rotateRight(cards);
+    updateFrontCard(cards);
+    cardAnimation(cards);
   }
-  return mod;
-}
+})
 
-function getRotations(cards) {
-  return Math.abs(cards.a.position);
-}
-
-function getDay(ms) {
-  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-  var d = new Date(ms);
-  var day = d.getDay();
-  return days[day];
-}
-
-function getShortDay(ms) {
-  return getDay(ms).slice(0,3);
-}
-
-function getHour(ms) {
-  var d = new Date(ms);
-  var hour = d.getHours();
-  return (hour%12 === 0 ? '12' : hour%12) + (hour>12?' PM': ' AM');
-}
-
+// Range Slider
 var sliders = document.querySelectorAll('.slider');
 for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
     var card = e.target.parentNode.parentNode
     var h = e.target.value
-    renderHourly(card, getRotations(cards), h)
+    renderHourly(card, getIndex(cards), h)
   })
 }
 
+// City Input
 var cityInput = document.querySelectorAll('.city');
 for (let i=0; i<cityInput.length; i++) {
   cityInput[i].addEventListener('blur', async e => {
@@ -383,35 +428,7 @@ for (let i=0; i<cityInput.length; i++) {
   })
 }
 
-function handleForwardLookup(card, resp) {
-  var rotations = getRotations(cards);
-  var frontCardId = findFrontCard(cards);
-  if ("error" in resp) {
-    console.log("try again")
-    renderBlankCard(frontCardId);
-    var input = document.querySelector(`#${card} .city`);
-    input.disabled = false;
-    input.focus();
-  }
-  else {
-    console.log("successfully added new location")
-    transferCurrentLocation(rotations, resp);
-    getWeather(myLocals[rotations], rotations)
-      .then((w)=>{
-        weather.push(w);
-        renderWeather(frontCardId, rotations)
-      });
-  }
-}
-
-async function forwardLookup(city) {
-  var path = 'location/forward/'
-  var url = appUrl + path + city;
-  resp = await fetch(url);
-  json = await resp.json();
-  return json;
-}
-
+// Swiping Left/Right
 document.addEventListener("touchstart", (e)=> {
   if (!e.target.classList.contains('slider')) {
     document.addEventListener("touchmove", onTouchMove)
@@ -428,13 +445,13 @@ function onTouchMove (e) {
   var velocity = (x-touchStart.x)/(time-touchStart.time);
   if (velocity > .5) {
     cards = rotateRight(cards);
-    updateNextCard(cards);
-    updateCardsInDOM(cards);
+    updateFrontCard(cards);
+    cardAnimation(cards);
     document.removeEventListener("touchmove", onTouchMove)
   } else if (velocity < -.5) {
     cards = rotateLeft(cards);
-    updateNextCard(cards);
-    updateCardsInDOM(cards)
+    updateFrontCard(cards);
+    cardAnimation(cards)
     document.removeEventListener("touchmove", onTouchMove)
   } else {
     touchStart = {
