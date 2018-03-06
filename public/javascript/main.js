@@ -411,19 +411,19 @@ window.addEventListener('keydown', e => {
     cardAnimation(cards);
   }
   else if (e.keyCode === 8) { // 'delete'
-  var index = getIndex(cards);
-  if (index >= myLocals.length)
-    console.log('cannot delete this card')
-  else {
-    console.log('delete card');
-    animateDelete(findFrontCard(cards));
-    deleteCard(myLocals, index)
-    updateFrontCard(cards);
-    cardAnimation(cards);
-    console.log(cards)
-    console.log(document.querySelector('#a'))
-    console.log(document.querySelector('#b'))
-  }
+    var index = getIndex(cards);
+    if (index >= myLocals.length)
+      console.log('cannot delete this card')
+    else {
+      console.log('delete card');
+      animateDelete(findFrontCard(cards));
+      deleteCard(myLocals, index)
+      updateFrontCard(cards);
+      cardAnimation(cards);
+      console.log(cards)
+      console.log(document.querySelector('#a'))
+      console.log(document.querySelector('#b'))
+    }
   }
 })
 
@@ -482,22 +482,43 @@ document.addEventListener("touchstart", (e)=> {
 
 function onTouchMove (e) {
   var x = e.changedTouches[0].clientX;
+  var y = e.changedTouches[0].clientY;
   var time = e.timeStamp;
-  var velocity = (x-touchStart.x)/(time-touchStart.time);
-  if (velocity > .5) {
-    cards = rotateRight(cards);
-    updateFrontCard(cards);
-    cardAnimation(cards);
-    document.removeEventListener("touchmove", onTouchMove)
-  } else if (velocity < -.5) {
-    cards = rotateLeft(cards);
-    updateFrontCard(cards);
-    cardAnimation(cards)
-    document.removeEventListener("touchmove", onTouchMove)
-  } else {
-    touchStart = {
-      x: e.changedTouches[0].clientX,
-      time: e.timeStamp
+  var xVelocity = (x-touchStart.x)/(time-touchStart.time);
+  var yVelocity = (y-touchStart.y)/(time-touchStart.time);
+  if (xVelocity >= yVelocity) {
+    if (xVelocity > .5) {
+      cards = rotateRight(cards);
+      updateFrontCard(cards);
+      cardAnimation(cards);
+      document.removeEventListener("touchmove", onTouchMove)
+    } else if (xVelocity < -.5) {
+      cards = rotateLeft(cards);
+      updateFrontCard(cards);
+      cardAnimation(cards)
+      document.removeEventListener("touchmove", onTouchMove)
+    } else {
+      touchStart = {
+        x: e.changedTouches[0].clientX,
+        time: e.timeStamp
+      }
+    }
+  }
+  else {
+    if (yVelocity > .5) {
+      var index = getIndex(cards);
+      if (index >= myLocals.length)
+        console.log('cannot delete this card')
+      else {
+        console.log('delete card');
+        animateDelete(findFrontCard(cards));
+        deleteCard(myLocals, index)
+        updateFrontCard(cards);
+        cardAnimation(cards);
+        console.log(cards)
+        console.log(document.querySelector('#a'))
+        console.log(document.querySelector('#b'))
+      }
     }
   }
 }
