@@ -416,12 +416,24 @@ window.addEventListener('keydown', e => {
     console.log('cannot delete this card')
   else {
     console.log('delete card');
+    animateDelete(findFrontCard(cards));
     deleteCard(myLocals, index)
     updateFrontCard(cards);
     cardAnimation(cards);
+    console.log(cards)
+    console.log(document.querySelector('#a'))
+    console.log(document.querySelector('#b'))
   }
   }
 })
+
+function animateDelete(cardId) {
+  var card = document.querySelector(`#${cardId}`);
+  card.classList.add('delete');
+  setTimeout(()=>{
+    card.classList.remove('delete');
+  },1000);
+}
 
 // Range Slider
 var sliders = document.querySelectorAll('.slider');
