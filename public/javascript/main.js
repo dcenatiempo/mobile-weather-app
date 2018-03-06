@@ -37,6 +37,13 @@ function loadLocalStorage(item) {
     return [];
 }
 
+function deleteCard(myLocals, index) {
+  myLocals.splice(index, 1);
+  weather.splice(index, 1);
+  sliderPos.splice(index, 1);
+  saveToLocalStorage(myLocals);
+}
+
 /** Program Flow **************************************************************/
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
@@ -393,15 +400,26 @@ function renderWeekly(card, index) {
 /** Event Listeners ***********************************************************/
 // Rotate with arrow keys
 window.addEventListener('keydown', e => {
-  if (e.keyCode === 37) { // rotate left
+  if (e.keyCode === 37) { // 'left arrow'
     cards = rotateLeft(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
   }
-  else if (e.keyCode === 39) { // rotate right
+  else if (e.keyCode === 39) { // 'right arrow'
     cards = rotateRight(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
+  }
+  else if (e.keyCode === 8) { // 'delete'
+  var index = getIndex(cards);
+  if (index >= myLocals.length)
+    console.log('cannot delete this card')
+  else {
+    console.log('delete card');
+    deleteCard(myLocals, index)
+    updateFrontCard(cards);
+    cardAnimation(cards);
+  }
   }
 })
 
