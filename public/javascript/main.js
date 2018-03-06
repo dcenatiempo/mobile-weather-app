@@ -475,6 +475,7 @@ document.addEventListener("touchstart", (e)=> {
     document.addEventListener("touchmove", onTouchMove)
   }
   touchStart = {
+    y: e.changedTouches[0].clientY,
     x: e.changedTouches[0].clientX,
     time: e.timeStamp
   }
@@ -486,7 +487,9 @@ function onTouchMove (e) {
   var time = e.timeStamp;
   var xVelocity = (x-touchStart.x)/(time-touchStart.time);
   var yVelocity = (y-touchStart.y)/(time-touchStart.time);
-  if (xVelocity >= yVelocity) {
+  if (Math.abs(xVelocity) >= Math.abs(yVelocity)) {
+    console.log('x wins!')
+    console.log(xVelocity)
     if (xVelocity > .5) {
       cards = rotateRight(cards);
       updateFrontCard(cards);
@@ -500,12 +503,15 @@ function onTouchMove (e) {
     } else {
       touchStart = {
         x: e.changedTouches[0].clientX,
+        y: e.changedTouches[0].clientY,
         time: e.timeStamp
       }
     }
   }
   else {
-    if (yVelocity > .5) {
+    console.log('y wins!')
+    console.log(yVelocity)
+    if (yVelocity < -.5) {
       var index = getIndex(cards);
       if (index >= myLocals.length)
         console.log('cannot delete this card')
