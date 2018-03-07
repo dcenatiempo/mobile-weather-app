@@ -420,9 +420,6 @@ window.addEventListener('keydown', e => {
       deleteCard(myLocals, index)
       updateFrontCard(cards);
       cardAnimation(cards);
-      console.log(cards)
-      console.log(document.querySelector('#a'))
-      console.log(document.querySelector('#b'))
     }
   }
 })
@@ -521,9 +518,7 @@ function onTouchMove (e) {
         deleteCard(myLocals, index)
         updateFrontCard(cards);
         cardAnimation(cards);
-        console.log(cards)
-        console.log(document.querySelector('#a'))
-        console.log(document.querySelector('#b'))
+        document.removeEventListener("touchmove", onTouchMove)
       }
     }
   }
