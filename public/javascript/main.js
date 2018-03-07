@@ -45,6 +45,16 @@ function deleteCard(myLocals, index) {
 }
 
 /** Program Flow **************************************************************/
+/*
+1) open app
+2) fetch current location
+3) fetch current location weather
+3) render current location weather as "home page"
+4) compare current location to saved locations
+5) fetch saved location weather (unless any saved location is current location)
+6) when flipping through weather cards, only display city if weather has not fetched yet
+*/
+
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
   // use geolocation API
