@@ -1,14 +1,61 @@
-/** Global State **************************************************************/
+/*
+ TODO:
+ 1) add favorites button
+
+ */
+ /** Global State **************************************************************/
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
 var appUrl = prodUrl;
 
+class Local {
+  constructor(lat, lon) {
+    this.lat = lat;
+    this.lon = lon;
+    this.city = undefined;
+    this.region = undefined
+  }
+}
+async function fetchWeather(local) {
+  var weather;
+  var path = 'weather/'
+  var url = appUrl + path + local.lat + ',' + local.long;
+
+  var resp = await fetch(url);
+  var json = await resp.json();
+  weather = await json;
+  this.weather = weather;
+}
+
+class Weather {
+  constructor(local) {
+    this.local = local;
+    this.sliderPos = "0";
+    this.favorite = false;
+    this.weather = undefined;
+  }
+
+  async fetchWeather() {
+    var weather;
+    var path = 'weather/'
+    var url = appUrl + path + this.local.lat + ',' + this.local.lon;
+  
+    var resp = await fetch(url);
+    var json = await resp.json();
+    weather = await json;
+    this.weather = weather;
+  }
+
+  toggleFavorite() {
+    this.favorite = !this.favorite;
+  }
+}
+
+
 var touchStart;
 var currentLocation = null;  // current location
 var myLocals = [];        // array of saved locations
-var weather = [];         // array of weather corresponding to myLocals
-var sliderPos = [];       // array of slider positions, 0-24
-var cards = {             // position of 3 weather cards in DOM
+var cards = {             // position of 2 weather cards in DOM
   a: {
     rotation: 0,
     position: 0 //'front'
@@ -22,28 +69,53 @@ var currentLocationUpdated = new Event('currentLocationUpdated');
 
 /** Local Storage *************************************************************/
 function saveLocation(index, current) {
-  myLocals[index] = current;
+  myLocals[index] = new Weather(current);
   saveToLocalStorage(myLocals);
 }
 
-function saveToLocalStorage(item) {
-  localStorage.setItem('myLocals', JSON.stringify(item))
+function saveToLocalStorage(myLocals) {
+  var locals = myLocals
+    .filter((local) => local.favorite === true)
+    .map((local) => local.local);
+  localStorage.setItem('myLocals', JSON.stringify(locals))
 }
 
-function loadLocalStorage(item) {
-  if (item in localStorage)
-    return JSON.parse(localStorage.getItem(item));
+function saveToSessionStorage(item) {
+  sessionStorage.setItem('myLocals', JSON.stringify(item))
+}
+
+function loadLocalStorage(key) {
+  var myLocals = [];
+  if (key in localStorage) {
+    let temp = JSON.parse(localStorage.getItem(key));
+    myLocals = temp.map((local) => new Weather(local));
+    myLocals.forEach((local) => local.toggleFavorite())
+  }
+  return myLocals;
+}
+
+function loadSessionStorage(key) {
+  if (key in sessionStorage)
+    return JSON.parse(localStorage.getItem(key));
   else
     return [];
 }
 
 function deleteCard(myLocals, index) {
   myLocals.splice(index, 1);
-  weather.splice(index, 1);
-  sliderPos.splice(index, 1);
   saveToLocalStorage(myLocals);
 }
 
+function isLocalinArray(current) {
+  var result = false;
+  myLocals.forEach((item, index) => {
+    if (item) {
+    if (current.city === item.local.city && current.region === item.local.region)
+      result = index;
+    }
+  })
+  return result;
+}
 /** Program Flow **************************************************************/
 /*
 1) open app
@@ -55,6 +127,20 @@ function deleteCard(myLocals, index) {
 6) when flipping through weather cards, only display city if weather has not fetched yet
 */
 
+myLocals = loadLocalStorage('myLocals');
+myLocals.unshift(undefined);
+document.addEventListener('currentLocationUpdated', async () => {
+  var index = isLocalinArray(currentLocation);
+  if (index) {
+    myLocals[0] = myLocals[index]
+    myLocals.splice(index, 1);
+    renderWeather(findFrontCard(cards), 0);
+  }
+  else {
+    myLocals[0] = new Weather(currentLocation);
+    renderWeather(findFrontCard(cards), 0);
+  }
+});
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
   // use geolocation API
@@ -81,46 +167,21 @@ if ("geolocation" in navigator) {
 }
 
 /* SECOND: Are there any saved locations??? */
-myLocals = loadLocalStorage('myLocals');
-if (myLocals.length > 0) {
-  fetchFirstWeather();
-  fetchRemainingWeather(myLocals);
-}
-else {
-  console.log('no locations in storage, getting location now...');
-  if (!currentLocation) {
-    document.addEventListener('currentLocationUpdated', function namedFunc(){
-      saveLocation(0, currentLocation);
-      fetchFirstWeather();
-      document.removeEventListener('currentLocationUpdated', namedFunc);
-    });
-  }
-  else {
-    saveLocation(0, currentLocation);
-    fetchFirstWeather();
-  }
-}
-
-function fetchFirstWeather() {
-  getWeather(myLocals[0])
-    .then(w => {
-      weather[0] = w;
-      sliderPos[0] = '0';
-      renderWeather('a', 0);
-    });
-}
-
-async function fetchRemainingWeather(myLocals) {
-  myLocals.forEach((myLocal, index) => {
-    getWeather(myLocal)
-    .then((data)=>{
-      if (index > 0) {
-        weather[index] = data;
-        sliderPos[index] = '0';
-      }
-    })
-  })
-}
+// myLocals = loadLocalStorage('myLocals');
+// if (myLocals.length > 0) {
+//   fetchFirstWeather();
+//   fetchRemainingWeather(myLocals);
+// }
+// else {
+//   console.log('no locations in storage, getting location now...');
+//   if (!currentLocation) {
+    
+//   }
+//   else {
+//     saveLocation(0, currentLocation);
+//     fetchFirstWeather();
+//   }
+// }
 
 /** REST API calls ************************************************************/
 function getCurrentPosition() {
@@ -129,13 +190,13 @@ function getCurrentPosition() {
   .then(resp => {
     return resp.json();
   }).then(json => {
-    currentLocation = {
-      lat: json.latitude,
-      long: json.longitude,
-      city: json.city,
-      state: json.region_code
-    }
-    document.dispatchEvent(currentLocationUpdated);
+    currentLocation = new Local(json.lat, json.lon);
+    getCity(currentLocation.lat, currentLocation.lon)
+    .then(data=>{
+      currentLocation.city = data.address.city;
+      currentLocation.region = data.address.state;
+      document.dispatchEvent(currentLocationUpdated);
+    })
   }).catch(err => {
     console.error(err);
     console.warn("trouble getting location")
@@ -143,16 +204,14 @@ function getCurrentPosition() {
 }
 
 async function getCurrentPositionCallback(pos) {
-  getCity(pos.coords.latitude, pos.coords.longitude)
+  currentLocation = new Local(pos.coords.latitude, pos.coords.longitude)
+  getCity(currentLocation.lat, currentLocation.lon)
   .then(data=>{
-    currentLocation = {
-      lat: pos.coords.latitude,
-      long: pos.coords.longitude,
-      city: data.address.city,
-      state: data.address.state
-    }
+    currentLocation.city = data.address.city;
+    currentLocation.region = data.address.state;
     document.dispatchEvent(currentLocationUpdated);
-  }).catch(err => {
+  })
+  .catch(err => {
     console.error(err);
     console.warn("trouble getting location")
   });
@@ -190,12 +249,7 @@ function handleForwardLookup(card, resp) {
   else {
     console.log("successfully added new location")
     saveLocation(index, resp);
-    getWeather(myLocals[index])
-      .then((w)=>{
-        weather[index] = w;
-        sliderPos[index] = "0";
-        renderWeather(frontCardId, index)
-      });
+    renderWeather(frontCardId, index);
   }
 }
 
@@ -317,6 +371,7 @@ function renderBlankCard(cardId) {
   card.querySelector('.city').disabled = false;
   card.querySelector('.todays-forecast .forecast').innerText = '';
   card.querySelector('.week-forecast .forecast').innerText = '';
+  renderFavorites(cardId);
   renderHourlyBlank(card);
   renderWeeklyBlank(card);
 }
@@ -350,6 +405,7 @@ function renderDownloadCard(cardId, index) {
   card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
   card.querySelector('.week-forecast .forecast').innerText = 'Getting weather...';
+  renderFavorites(cardId, index);
   renderHourlyDownload(card);
   renderWeeklyDownload(card);
 }
@@ -376,30 +432,43 @@ function renderWeeklyDownload(card) {
 }
 
 // Card with weather
-function renderWeather(cardId, index) {
+async function renderWeather(cardId, index) {
   var card = document.getElementById(cardId);
-  card.querySelector('.city').value = myLocals[index].city;
+  card.querySelector('.city').value = myLocals[index].local.city;
   card.querySelector('.city').classList.add('filled');
   card.querySelector('.city').disabled = true;
-  card.querySelector('.todays-forecast .forecast').innerText = weather[index].hourly.summary;
-  card.querySelector('.week-forecast .forecast').innerText = weather[index].daily.summary;
-  renderHourly(card, index, sliderPos[index]);
+  renderFavorites(cardId, index);
+
+  if (!myLocals[index].weather)
+    await myLocals[index].fetchWeather();
+
+  card.querySelector('.todays-forecast .forecast').innerText = myLocals[index].weather.hourly.summary;
+  card.querySelector('.week-forecast .forecast').innerText = myLocals[index].weather.daily.summary;
+  renderHourly(card, index, myLocals[index].sliderPos);
   renderWeekly(card, index);
 }
+function renderFavorites(cardId, index = null) {
+  var card = document.getElementById(cardId);
+  card.querySelector('.favorite').classList = 'favorite';
+  if (index === null)
+    card.querySelector('.favorite').classList.add('hidden');
+  else if (index >= 0 && myLocals[index].favorite)
+    card.querySelector('.favorite').classList.add('clicked');
+}
 function renderHourly(card, index, h) {
-  card.querySelector('.summary .day').innerText = getShortDay(weather[index].hourly.data[h].time*1000);
-  card.querySelector('.summary .time').innerText = getHour(weather[index].hourly.data[h].time*1000);
-  card.querySelector('.summary .weather-summary').innerText = weather[index].hourly.data[h].summary;
-  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${weather[index].hourly.data[h].icon}`;
-  card.querySelector('.todays-forecast .temp').innerText = Math.round(weather[index].hourly.data[h].temperature);
-  card.querySelector('.todays-forecast .precip').innerText = Math.round(weather[index].hourly.data[h].precipProbability * 100);
-  card.querySelector('.todays-forecast .humidity').innerText = Math.round(weather[index].hourly.data[h].humidity * 100);
-  card.querySelector('.todays-forecast .windSpeed').innerText = Math.round(weather[index].hourly.data[h].windSpeed);
+  card.querySelector('.summary .day').innerText = getShortDay(myLocals[index].weather.hourly.data[h].time*1000);
+  card.querySelector('.summary .time').innerText = getHour(myLocals[index].weather.hourly.data[h].time*1000);
+  card.querySelector('.summary .weather-summary').innerText = myLocals[index].weather.hourly.data[h].summary;
+  card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${myLocals[index].weather.hourly.data[h].icon}`;
+  card.querySelector('.todays-forecast .temp').innerText = Math.round(myLocals[index].weather.hourly.data[h].temperature);
+  card.querySelector('.todays-forecast .precip').innerText = Math.round(myLocals[index].weather.hourly.data[h].precipProbability * 100);
+  card.querySelector('.todays-forecast .humidity').innerText = Math.round(myLocals[index].weather.hourly.data[h].humidity * 100);
+  card.querySelector('.todays-forecast .windSpeed').innerText = Math.round(myLocals[index].weather.hourly.data[h].windSpeed);
   card.querySelector('.slider').value = h;
 }
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
-  weather[index].daily.data.forEach((day, index)=> {
+  myLocals[index].weather.daily.data.forEach((day, index)=> {
     li[index].querySelector('.day').innerText = getDay(day.time*1000);
     li[index].querySelector('.weather-icon').className = `weather-icon ${day.icon}`;
     li[index].querySelector('.temp .hi').innerText = Math.round(day.temperatureHigh);
@@ -408,6 +477,18 @@ function renderWeekly(card, index) {
 }
 
 /** Event Listeners ***********************************************************/
+// favorites button
+var favorites = document.querySelectorAll('.favorite');
+favorites.forEach(button => {
+  button.addEventListener('click', (e) => {
+    var button = e.target;
+    var index = getIndex(cards);
+    var cardId = findFrontCard(cards);
+    myLocals[index].toggleFavorite();
+    renderFavorites(cardId, index);
+    saveToLocalStorage(myLocals);
+  })
+});
 // Rotate with arrow keys
 window.addEventListener('keydown', e => {
   if (e.keyCode === 37) { // 'left arrow'
@@ -448,8 +529,8 @@ for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
     var card = e.target.parentNode.parentNode
     var index = getIndex(cards);
-    sliderPos[index] = e.target.value;
-    renderHourly(card, getIndex(cards), sliderPos[index]);
+    myLocals[index].sliderPos = e.target.value;
+    renderHourly(card, getIndex(cards), myLocals[index].sliderPos);
   })
 }
 

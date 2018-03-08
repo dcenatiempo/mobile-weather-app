@@ -66,9 +66,9 @@ async function forwardGeo(local){
     let geo = await reverseGeo(data)
     return {
       "lat": geo.lat,
-      "long": geo.lon,
+      "lon": geo.lon,
       "city": geo.address.city,
-      "state": geo.address.state
+      "region": geo.address.state
     };
   }
   else return { "error": "invalid search"}

@@ -317,6 +317,23 @@ input[type=range]:focus::-ms-fill-upper {
   animation-duration: 1s;
   animation-iteration-count: 1;
 }
+.favorite {
+  grid-column: 3 / 4;
+  grid-row: 1;
+  padding: 10px;
+  background-color: white;
+  border: solid;
+  z-index: 100;
+  align-self: flex-start;
+  justify-self: flex-end;
+  color: black;
+}
+.favorite.clicked {
+  background-color: goldenrod;
+}
+.favorite.hidden {
+  display: none;
+}
 
 @keyframes delete {
   40% {
