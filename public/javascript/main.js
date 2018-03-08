@@ -128,18 +128,22 @@ function isLocalinArray(current) {
 */
 
 myLocals = loadLocalStorage('myLocals');
-myLocals.unshift(undefined);
+// myLocals.unshift(undefined);
 document.addEventListener('currentLocationUpdated', async () => {
   var index = isLocalinArray(currentLocation);
-  if (index) {
+  if (index !== false) {
+    myLocals.unshift(undefined);
     myLocals[0] = myLocals[index]
     myLocals.splice(index, 1);
-    renderWeather(findFrontCard(cards), 0);
+    index = getIndex(cards);
   }
   else {
+    myLocals.unshift(undefined);
     myLocals[0] = new Weather(currentLocation);
-    renderWeather(findFrontCard(cards), 0);
   }
+  index = getIndex(cards);
+  if (index === 0) // only render if on this card
+    renderWeather(findFrontCard(cards), 0);
 });
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
@@ -236,8 +240,7 @@ async function getWeather(myLocal){
   return weather;
 }
 
-function handleForwardLookup(card, resp) {
-  var index = getIndex(cards);
+function handleForwardLookup(card, resp, index) {
   var frontCardId = findFrontCard(cards);
   if ("error" in resp) {
     console.log("try again")
@@ -249,6 +252,10 @@ function handleForwardLookup(card, resp) {
   else {
     console.log("successfully added new location")
     saveLocation(index, resp);
+    if (index != getIndex(cards)) {
+      console.log('argh, you rotated before rendering');
+      return;
+    }
     renderWeather(frontCardId, index);
   }
 }
@@ -400,9 +407,9 @@ function renderWeeklyBlank(card) {
 // Card Downloading Weather
 function renderDownloadCard(cardId, index) {
   var card = document.getElementById(cardId);
-  card.querySelector('.city').value = '';
-  card.querySelector('.city').style.pointerEvents = 'none';
-  card.querySelector('.city').style.cursor = 'text';
+  card.querySelector('.city').value = myLocals[index].local.city;
+  // card.querySelector('.city').style.pointerEvents = 'none';
+  // card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
   card.querySelector('.week-forecast .forecast').innerText = 'Getting weather...';
   renderFavorites(cardId, index);
@@ -439,8 +446,15 @@ async function renderWeather(cardId, index) {
   card.querySelector('.city').disabled = true;
   renderFavorites(cardId, index);
 
-  if (!myLocals[index].weather)
+  if (!myLocals[index].weather) {
+    renderDownloadCard(cardId, index)
     await myLocals[index].fetchWeather();
+  }
+  if (index != getIndex(cards)) {
+    console.log('argh, you rotated before rendering');
+    return;
+  }
+
 
   card.querySelector('.todays-forecast .forecast').innerText = myLocals[index].weather.hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = myLocals[index].weather.daily.summary;
@@ -543,16 +557,18 @@ for (let i=0; i<cityInput.length; i++) {
 
     var card = e.target.parentNode.parentNode.id;
     e.target.disabled = true;
+    index = getIndex(cards);
     let resp = await forwardLookup(e.target.value);
-    handleForwardLookup(card, resp);
+    handleForwardLookup(card, resp, index);
   });
   cityInput[i].addEventListener('keypress', async e => {
     if (e.keyCode === 13) {
       if (e.target.value === '') return;
       var card = e.target.parentNode.parentNode.id;
       e.target.disabled = true;
+      index = getIndex(cards);
       let resp = await forwardLookup(e.target.value);
-      handleForwardLookup(card, resp);
+      handleForwardLookup(card, resp, index);
     }
   })
 }
