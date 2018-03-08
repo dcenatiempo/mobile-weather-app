@@ -54,8 +54,8 @@ class Weather {
 
 var touchStart;
 var currentLocation = null;  // current location
-var myLocals = [];        // array of saved locations
-var cards = {             // position of 2 weather cards in DOM
+var myLocals = [];           // array of saved locations
+var cards = {                // position of 2 weather cards in DOM
   a: {
     rotation: 0,
     position: 0 //'front'
@@ -169,23 +169,6 @@ if ("geolocation" in navigator) {
 } else {
   getCurrentPosition();
 }
-
-/* SECOND: Are there any saved locations??? */
-// myLocals = loadLocalStorage('myLocals');
-// if (myLocals.length > 0) {
-//   fetchFirstWeather();
-//   fetchRemainingWeather(myLocals);
-// }
-// else {
-//   console.log('no locations in storage, getting location now...');
-//   if (!currentLocation) {
-    
-//   }
-//   else {
-//     saveLocation(0, currentLocation);
-//     fetchFirstWeather();
-//   }
-// }
 
 /** REST API calls ************************************************************/
 function getCurrentPosition() {
