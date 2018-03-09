@@ -1,6 +1,9 @@
 /*
  TODO:
- 1) add favorites button
+ 1) Better background colors - gradient
+ 2) style favorites button
+ 3) account for time zones (weather.offset)
+ 4) 
 
  */
  /** Global State **************************************************************/
@@ -295,6 +298,11 @@ function getHour(ms) {
   var hour = d.getHours();
   return (hour%12 === 0 ? '12' : hour%12) + (hour>12?' PM': ' AM');
 }
+function get24Hour(ms) {
+  var d = new Date(ms);
+  var hour = d.getHours();
+  return hour;
+}
 
 /** Card Rotation State *******************************************************/
 function rotateLeft (cards) {
@@ -438,7 +446,6 @@ async function renderWeather(cardId, index) {
     return;
   }
 
-
   card.querySelector('.todays-forecast .forecast').innerText = myLocals[index].weather.hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = myLocals[index].weather.daily.summary;
   renderHourly(card, index, myLocals[index].sliderPos);
@@ -453,6 +460,21 @@ function renderFavorites(cardId, index = null) {
     card.querySelector('.favorite').classList.add('clicked');
 }
 function renderHourly(card, index, h) {
+  var sunrise = get24Hour(myLocals[index].weather.daily.data[0].sunriseTime * 1000);
+  var sunset = get24Hour(myLocals[index].weather.daily.data[0].sunsetTime * 1000);
+  var currentHour = get24Hour(myLocals[index].weather.hourly.data[h].time*1000);
+  if (currentHour === sunset || currentHour === sunrise) {
+    card.classList.remove('daytime', 'nighttime');
+    card.classList.add('twilight')
+  }
+  else if (currentHour > sunrise && currentHour < sunset) {
+    card.classList.remove('twilight', 'nighttime');
+    card.classList.add('daytime')
+  }
+  else if (currentHour < sunrise || currentHour > sunset) {
+    card.classList.remove('daytime', 'twilight');
+    card.classList.add('nighttime')
+  }
   card.querySelector('.summary .day').innerText = getShortDay(myLocals[index].weather.hourly.data[h].time*1000);
   card.querySelector('.summary .time').innerText = getHour(myLocals[index].weather.hourly.data[h].time*1000);
   card.querySelector('.summary .weather-summary').innerText = myLocals[index].weather.hourly.data[h].summary;
