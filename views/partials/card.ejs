@@ -1,86 +1,90 @@
-  <section class="todays-forecast">
-    <button class="favorite hidden"></button>
-    <input class="city filled" placeholder="Enter Location" value="Getting Location"></input>
-    <h2 class="summary">
+<div class="background white" vanish="false"></div>
+<div class="background daytime" vanish="false"></div>
+<div class="background nighttime" vanish="true"></div>
+<div class="background twilight" vanish="true"></div>
+<section class="todays-forecast">
+  <button class="favorite hidden"></button>
+  <input class="city filled" placeholder="Enter Location" value="Getting Location"></input>
+  <h2 class="summary">
+    <span class="day"></span>
+    <span class="time"></span>
+    <span class="weather-summary">Getting Weather</span>
+  </h2>
+  <div class="weather-icon unknown"></div>
+  <h2 class="temp">--</h2>
+  <div class="details">
+    <p>Precip:</p>
+    <p class="precip">--</p>
+    <p>Humidity:</p>
+    <p class="humidity">--</p>
+    <p>Wind:</p>
+    <p class="windSpeed">--</p>
+  </div>
+  <h3 class="forecast">
+    
+  </h3>
+  <input type="range" class="slider" min="0" max="24" step="1" value="0">
+</section>
+<section class="week-forecast">
+  <h3 class="forecast">
+    
+  </h3>
+  <ul class="week">
+    <li>
       <span class="day"></span>
-      <span class="time"></span>
-      <span class="weather-summary">Getting Weather</span>
-    </h2>
-    <div class="weather-icon unknown"></div>
-    <h2 class="temp">--</h2>
-    <div class="details">
-      <p>Precip:</p>
-      <p class="precip">--</p>
-      <p>Humidity:</p>
-      <p class="humidity">--</p>
-      <p>Wind:</p>
-      <p class="windSpeed">--</p>
-    </div>
-    <h3 class="forecast">
-      
-    </h3>
-    <input type="range" class="slider" min="0" max="24" step="1" value="0">
-  </section>
-  <section class="week-forecast">
-    <h3 class="forecast">
-      
-    </h3>
-    <ul class="week">
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-      <li>
-        <span class="day"></span>
-        <span class="weather-icon unknown"></span>
-        <span class="temp">
-          <span class="hi">--</span><span class="lo">--</span>
-        </span>
-      </li>
-    </ul>
-  </section>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+    <li>
+      <span class="day"></span>
+      <span class="weather-icon unknown"></span>
+      <span class="temp">
+        <span class="hi">--</span><span class="lo">--</span>
+      </span>
+    </li>
+  </ul>
+</section>
