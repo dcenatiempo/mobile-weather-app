@@ -381,18 +381,42 @@ input[type=range]:focus::-ms-fill-upper {
   grid-column: 3 / 4;
   grid-row: 1;
   padding: 10px;
-  background-color: white;
-  border: solid;
+  background-color: transparent;
+  border: none;
   z-index: 100;
   align-self: flex-start;
   justify-self: flex-end;
-  color: black;
+  font-size: 3rem;
+  line-height: 1.5rem;
+  filter: invert(70%) opacity(.3);
+}
+.favorite:hover {
+  filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
 }
 .favorite.clicked {
-  background-color: goldenrod;
+  filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
+}
+.favorite.animate {
+  animation-name: favorite;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
 }
 .favorite.hidden {
   display: none;
+}
+@keyframes favorite {
+  10% {
+    transform: scale(.7, .7);
+    filter: invert(50%) sepia(14%) saturate(1297%) hue-rotate(344deg) brightness(60%) contrast(89%);
+  }
+  45% {
+    transform: scale(2, 2);
+    filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
+  }
+  80% {
+    transform: scale(.9, .9);
+    filter: invert(80%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(80%) contrast(89%);
+  }
 }
 
 @keyframes delete {

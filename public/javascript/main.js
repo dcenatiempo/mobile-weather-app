@@ -1,9 +1,9 @@
 /*
  TODO:
- 1) style favorites button
- 2) account for time zones (weather.offset)
- 3) Improve blank and download text/image values
- 4) Add nighttime weather icons
+ 1) account for time zones (weather.offset)
+ 2) Improve blank and download text/image values
+ 3) Add nighttime weather icons
+ 4) Fix background animation bug on flip
 
  */
  /** Global State **************************************************************/
@@ -452,11 +452,15 @@ async function renderWeather(cardId, index) {
 }
 function renderFavorites(cardId, index = null) {
   var card = document.getElementById(cardId);
-  card.querySelector('.favorite').classList = 'favorite';
+  var fav = card.querySelector('.favorite');
   if (index === null)
-    card.querySelector('.favorite').classList.add('hidden');
-  else if (index >= 0 && myLocals[index].favorite)
-    card.querySelector('.favorite').classList.add('clicked');
+    fav.classList.add('hidden');
+  else if (index >= 0 && myLocals[index].favorite) {
+    fav.classList.add('clicked');
+    fav.classList.remove('hidden');
+  }
+  else
+    fav.classList.remove('clicked', 'animate', 'hidden');
 }
 function renderHourly(card, index, h) {
   var sunrise = get24Hour(myLocals[index].weather.daily.data[0].sunriseTime * 1000);
@@ -509,6 +513,7 @@ var favorites = document.querySelectorAll('.favorite');
 favorites.forEach(button => {
   button.addEventListener('click', (e) => {
     var button = e.target;
+    button.classList.add('animate');
     var index = getIndex(cards);
     var cardId = findFrontCard(cards);
     myLocals[index].toggleFavorite();
@@ -519,11 +524,13 @@ favorites.forEach(button => {
 // Rotate with arrow keys
 window.addEventListener('keydown', e => {
   if (e.keyCode === 37) { // 'left arrow'
+    removeFavoriteAnimate();
     cards = rotateLeft(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
   }
   else if (e.keyCode === 39) { // 'right arrow'
+    removeFavoriteAnimate();
     cards = rotateRight(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
@@ -534,6 +541,7 @@ window.addEventListener('keydown', e => {
       console.log('cannot delete this card')
     else {
       console.log('delete card');
+      removeFavoriteAnimate();
       animateDelete(findFrontCard(cards));
       deleteCard(myLocals, index)
       updateFrontCard(cards);
@@ -588,7 +596,8 @@ for (let i=0; i<cityInput.length; i++) {
 
 // Swiping Left/Right
 document.addEventListener("touchstart", (e)=> {
-  if (!e.target.classList.contains('slider')) {
+  if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
+    removeFavoriteAnimate()
     document.addEventListener("touchmove", onTouchMove)
   }
   touchStart = {
@@ -642,4 +651,10 @@ function onTouchMove (e) {
       }
     }
   }
+}
+
+function removeFavoriteAnimate() {
+  var cardId = findFrontCard(cards);
+  var fav = document.querySelector(`#${cardId} .favorite`);
+  fav.classList.remove('animate');
 }
