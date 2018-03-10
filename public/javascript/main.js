@@ -1,9 +1,9 @@
 /*
  TODO:
- 1) Better background colors - gradient
- 2) style favorites button
- 3) account for time zones (weather.offset)
- 4) 
+ 1) style favorites button
+ 2) account for time zones (weather.offset)
+ 3) Improve blank and download text/image values
+ 4) Add nighttime weather icons
 
  */
  /** Global State **************************************************************/
@@ -127,7 +127,6 @@ function isLocalinArray(current) {
 3) render current location weather as "home page"
 4) compare current location to saved locations
 5) fetch saved location weather (unless any saved location is current location)
-6) when flipping through weather cards, only display city if weather has not fetched yet
 */
 
 myLocals = loadLocalStorage('myLocals');
@@ -136,8 +135,8 @@ document.addEventListener('currentLocationUpdated', async () => {
   var index = isLocalinArray(currentLocation);
   if (index !== false) {
     myLocals.unshift(undefined);
-    myLocals[0] = myLocals[index]
-    myLocals.splice(index, 1);
+    myLocals[0] = myLocals[index + 1]
+    myLocals.splice(index + 1, 1);
     index = getIndex(cards);
   }
   else {
@@ -466,14 +465,23 @@ function renderHourly(card, index, h) {
   if (currentHour === sunset || currentHour === sunrise) {
     card.classList.remove('daytime', 'nighttime');
     card.classList.add('twilight')
+    card.querySelector('.daytime').setAttribute('vanish', true);
+    card.querySelector('.nighttime').setAttribute('vanish', true);
+    card.querySelector('.twilight').setAttribute('vanish', false);
   }
   else if (currentHour > sunrise && currentHour < sunset) {
     card.classList.remove('twilight', 'nighttime');
-    card.classList.add('daytime')
+    card.classList.add('daytime');
+    card.querySelector('.daytime').setAttribute('vanish', false);
+    card.querySelector('.nighttime').setAttribute('vanish', true);
+    card.querySelector('.twilight').setAttribute('vanish', true);
   }
   else if (currentHour < sunrise || currentHour > sunset) {
     card.classList.remove('daytime', 'twilight');
-    card.classList.add('nighttime')
+    card.classList.add('nighttime');
+    card.querySelector('.daytime').setAttribute('vanish', true);
+    card.querySelector('.nighttime').setAttribute('vanish', false);
+    card.querySelector('.twilight').setAttribute('vanish', true);
   }
   card.querySelector('.summary .day').innerText = getShortDay(myLocals[index].weather.hourly.data[h].time*1000);
   card.querySelector('.summary .time').innerText = getHour(myLocals[index].weather.hourly.data[h].time*1000);

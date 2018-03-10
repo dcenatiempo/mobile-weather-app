@@ -40,51 +40,64 @@ body {
    visibility: hidden;
 }
 div.background {
-  transition: background-color 1s;
+  transition: opacity 2s;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+div.background[vanish=false] {
+  opacity: 1;
+}
+div.background[vanish=true] {
+  opacity: 0;
+}
+div.white {
+  background-color: white;
 }
 div.daytime {
-  background-color: #f7fdff;
+  background: linear-gradient(#b9e3ff, #f7fdff);
 }
 div.twilight {
-  background-color: rgb(142, 120, 184);
+  background: linear-gradient(rgb(142, 120, 184), rgb(255, 217, 0));
 }
 div.nighttime {
-  background-color: rgb(30, 27, 51);
+  background: linear-gradient(rgb(21, 19, 31), rgb(44, 39, 81));
 }
 .daytime section, .daytime section input{
   color: rgb(31, 31, 31);
-  transition: color 1s;
+  transition: color 2s;
 }
 .daytime .weather-icon {
   /* filter: invert(69%) sepia(76%) hue-rotate(19deg); */
-  transition: filter 1s;
+  transition: filter 2s;
 }
 .daytime .lo {
-  transition: background-color 1s, color 1s;
+  transition: background-color 2s, color 1s;
 }
 .twilight section, .twilight section input{
-  color: rgb(246, 224, 178);
-  transition: color 1s;
+  color: rgb(31, 31, 31);
+  transition: color 2s;
 }
 .twilight .lo {
-  color: rgb(197, 182, 152);
-  transition: color 1s;
+  color: rgb(103, 103, 103);
+  transition: color 2s;
 }
 .twilight .weather-icon {
-  filter: invert(70%) sepia(100%) hue-rotate(0deg);
-  transition: filter 1s;
+  /* filter: invert(70%) sepia(100%) hue-rotate(0deg); */
+  transition: filter 2s;
 }
 .nighttime section, .nighttime section input{
   color: #dfdfb2;
-  transition: color 1s;
+  transition: color 2s;
 }
 .nighttime .lo {
   color: rgb(131, 126, 104);
-  transition: color 1s;
+  transition: color 2s;
 }
 .nighttime .weather-icon {
   filter: invert(69%) sepia(76%) hue-rotate(19deg);
-  transition: filter 1s;
+  transition: filter 2s;
 }
 
 .lo {
@@ -113,7 +126,7 @@ div.nighttime {
   font-size: 3rem;
   margin-top:1rem;
   border: none;
-  background-color: rgb(233, 233, 233);
+  background-color: #f7fdff;
 }
 .filled {
   pointer-events: none;
