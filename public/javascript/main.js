@@ -3,7 +3,7 @@
  1) account for time zones (weather.offset)
  2) Improve blank and download text/image values
  3) Add nighttime weather icons
- 4) Fix background animation bug on flip
+ 4) Fix background animation bug on delete/flip
 
  */
  /** Global State **************************************************************/
@@ -508,6 +508,12 @@ function renderWeekly(card, index) {
 }
 
 /** Event Listeners ***********************************************************/
+// remove hover effects if on touch device
+document.addEventListener('touchstart', function addtouchclass(e){ 
+  document.documentElement.classList.remove('no-touch');
+  document.removeEventListener('touchstart', addtouchclass, false);
+}, false)
+
 // favorites button
 var favorites = document.querySelectorAll('.favorite');
 favorites.forEach(button => {
@@ -524,13 +530,13 @@ favorites.forEach(button => {
 // Rotate with arrow keys
 window.addEventListener('keydown', e => {
   if (e.keyCode === 37) { // 'left arrow'
-    removeFavoriteAnimate();
+    removeAnimations();
     cards = rotateLeft(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
   }
   else if (e.keyCode === 39) { // 'right arrow'
-    removeFavoriteAnimate();
+    removeAnimations();
     cards = rotateRight(cards);
     updateFrontCard(cards);
     cardAnimation(cards);
@@ -541,7 +547,7 @@ window.addEventListener('keydown', e => {
       console.log('cannot delete this card')
     else {
       console.log('delete card');
-      removeFavoriteAnimate();
+      removeAnimations();
       animateDelete(findFrontCard(cards));
       deleteCard(myLocals, index)
       updateFrontCard(cards);
@@ -562,6 +568,7 @@ function animateDelete(cardId) {
 var sliders = document.querySelectorAll('.slider');
 for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
+    addAnimatetions();
     var card = e.target.parentNode.parentNode
     var index = getIndex(cards);
     myLocals[index].sliderPos = e.target.value;
@@ -597,7 +604,6 @@ for (let i=0; i<cityInput.length; i++) {
 // Swiping Left/Right
 document.addEventListener("touchstart", (e)=> {
   if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
-    removeFavoriteAnimate()
     document.addEventListener("touchmove", onTouchMove)
   }
   touchStart = {
@@ -617,11 +623,13 @@ function onTouchMove (e) {
     console.log('x wins!')
     console.log(xVelocity)
     if (xVelocity > .5) {
+      removeAnimations();
       cards = rotateRight(cards);
       updateFrontCard(cards);
       cardAnimation(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else if (xVelocity < -.5) {
+      removeAnimations();
       cards = rotateLeft(cards);
       updateFrontCard(cards);
       cardAnimation(cards)
@@ -643,6 +651,7 @@ function onTouchMove (e) {
         console.log('cannot delete this card')
       else {
         console.log('delete card');
+        removeAnimations();
         animateDelete(findFrontCard(cards));
         deleteCard(myLocals, index)
         updateFrontCard(cards);
@@ -653,8 +662,15 @@ function onTouchMove (e) {
   }
 }
 
-function removeFavoriteAnimate() {
-  var cardId = findFrontCard(cards);
-  var fav = document.querySelector(`#${cardId} .favorite`);
-  fav.classList.remove('animate');
+/* add/removeAnimations() are necissary so that cards
+ * do not animate or transition while "flipping" the cards
+ */
+function addAnimatetions() {
+  if (!document.documentElement.classList.contains('animate'))
+    document.documentElement.classList.add('animate');
+}
+
+function removeAnimations() {
+  if (document.documentElement.classList.contains('animate'))
+    document.documentElement.classList.remove('animate');
 }

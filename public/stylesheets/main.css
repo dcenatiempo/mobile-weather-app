@@ -39,8 +39,10 @@ body {
   -webkit-transition: transform .5s, visibility 0s linear .1625s;
    visibility: hidden;
 }
-div.background {
+.animate div.background {
   transition: opacity 2s;
+}
+div.background {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -59,25 +61,24 @@ div.daytime {
   background: linear-gradient(#b9e3ff, #f7fdff);
 }
 div.twilight {
-  background: linear-gradient(rgb(142, 120, 184), rgb(255, 217, 0));
+  background: linear-gradient(rgb(79, 118, 255), rgb(255, 217, 0));
 }
 div.nighttime {
   background: linear-gradient(rgb(21, 19, 31), rgb(44, 39, 81));
 }
+
+/******************************************************/
 .daytime section, .daytime section input{
   color: rgb(31, 31, 31);
-  transition: color 2s;
 }
 .daytime .weather-icon {
   /* filter: invert(69%) sepia(76%) hue-rotate(19deg); */
-  transition: filter 2s;
 }
 .daytime .lo {
-  transition: background-color 2s, color 1s;
+
 }
 .twilight section, .twilight section input{
   color: rgb(31, 31, 31);
-  transition: color 2s;
 }
 .twilight .lo {
   color: rgb(103, 103, 103);
@@ -85,20 +86,38 @@ div.nighttime {
 }
 .twilight .weather-icon {
   /* filter: invert(70%) sepia(100%) hue-rotate(0deg); */
-  transition: filter 2s;
 }
 .nighttime section, .nighttime section input{
   color: #dfdfb2;
-  transition: color 2s;
 }
 .nighttime .lo {
   color: rgb(131, 126, 104);
-  transition: color 2s;
 }
 .nighttime .weather-icon {
   filter: invert(69%) sepia(76%) hue-rotate(19deg);
+}
+
+/*****************************************/
+
+.animate .daytime section,
+.animate .nighttime section,
+.animate .twilight section,
+.animate .daytime section input,
+.animate .nighttime section input,
+.animate .twilight section input,
+.animate .daytime .lo,
+.animate .nighttime .lo,
+.animate .twilight .lo {
+  transition: color 2s;
+}
+
+.animate .daytime .weather-icon,
+.animate .twilight .weather-icon,
+.animate .nighttime .weather-icon {
   transition: filter 2s;
 }
+
+/****************************************/
 
 .lo {
   color: gray;
@@ -390,7 +409,7 @@ input[type=range]:focus::-ms-fill-upper {
   line-height: 1.5rem;
   filter: invert(70%) opacity(.3);
 }
-.favorite:hover {
+.no-touch .favorite:hover {
   filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
 }
 .favorite.clicked {
@@ -407,15 +426,12 @@ input[type=range]:focus::-ms-fill-upper {
 @keyframes favorite {
   10% {
     transform: scale(.7, .7);
-    filter: invert(50%) sepia(14%) saturate(1297%) hue-rotate(344deg) brightness(60%) contrast(89%);
   }
   45% {
     transform: scale(2, 2);
-    filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
   }
   80% {
     transform: scale(.9, .9);
-    filter: invert(80%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(80%) contrast(89%);
   }
 }
 
