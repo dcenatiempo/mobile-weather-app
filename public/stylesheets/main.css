@@ -55,13 +55,20 @@ div.background[vanish=true] {
   opacity: 0;
 }
 div.white {
-  background-color: white;
+  /* background-color: white; */
+  background: linear-gradient(rgb(142, 120, 184), rgb(255, 217, 0));
 }
 div.daytime {
   background: linear-gradient(#b9e3ff, #f7fdff);
 }
+div.before-twilight {
+  background: linear-gradient(rgb(174, 192, 255), rgb(255, 251, 231));
+}
 div.twilight {
   background: linear-gradient(rgb(79, 118, 255), rgb(255, 217, 0));
+}
+div.after-twilight {
+  background: linear-gradient(rgb(70, 64, 96), rgb(166, 130, 82));
 }
 div.nighttime {
   background: linear-gradient(rgb(21, 19, 31), rgb(44, 39, 81));
@@ -70,6 +77,7 @@ div.nighttime {
 /******************************************************/
 .daytime section, .daytime section input{
   color: rgb(31, 31, 31);
+  -webkit-text-fill-color:rgb(31, 31, 31);
 }
 .daytime .weather-icon {
   /* filter: invert(69%) sepia(76%) hue-rotate(19deg); */
@@ -79,6 +87,7 @@ div.nighttime {
 }
 .twilight section, .twilight section input{
   color: rgb(31, 31, 31);
+  -webkit-text-fill-color:rgb(31, 31, 31);
 }
 .twilight .lo {
   color: rgb(103, 103, 103);
@@ -89,6 +98,7 @@ div.nighttime {
 }
 .nighttime section, .nighttime section input{
   color: #dfdfb2;
+  -webkit-text-fill-color:#dfdfb2;
 }
 .nighttime .lo {
   color: rgb(131, 126, 104);

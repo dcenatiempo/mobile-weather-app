@@ -55,19 +55,28 @@ async function forwardGeo(local){
   let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${local}&format=json`;
   let response = await fetch(url);
   let data = await response.json();
+  console.log(data)
   let length = data.length;
+
   for (let i=0; i<length; i++) {
     if (data[i].display_name.indexOf('United States of America') > 0) {
       data = data[i].lat + ',' + data[i].lon;
       i = length;
     }
   }
+  // data = data[0].lat + ',' + data[0].lon;//remove
+
   if (typeof data === "string") {
     let geo = await reverseGeo(data)
+    console.log(geo);
+    var city;
+    if ("city" in geo.address) city = geo.address.city;
+    else if ("town" in geo.address) city = geo.address.town;
+    else if ("county" in geo.address) city = geo.address.county;
     return {
       "lat": geo.lat,
       "lon": geo.lon,
-      "city": geo.address.city,
+      "city": city,
       "region": geo.address.state
     };
   }

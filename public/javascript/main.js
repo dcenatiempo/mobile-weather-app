@@ -1,15 +1,16 @@
 /*
  TODO:
- 1) account for time zones (weather.offset)
  2) Improve blank and download text/image values
  3) Add nighttime weather icons
- 4) Fix background animation bug on delete/flip
+ 5) pull down to refresh
+ 6) Favorite color bug at night
+ 7) 
 
  */
  /** Global State **************************************************************/
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 class Local {
   constructor(lat, lon) {
@@ -147,10 +148,16 @@ document.addEventListener('currentLocationUpdated', async () => {
   if (index === 0) // only render if on this card
     renderWeather(findFrontCard(cards), 0);
 });
+
 /* FIRST: Get current location, no matter what */
 if ("geolocation" in navigator) {
   // use geolocation API
+  try{
   navigator.geolocation.getCurrentPosition(getCurrentPositionCallback);
+  }
+  catch(e){
+    getCurrentPosition();
+  }
   // check to see if permission denied
   try{
     navigator.permissions.query({name:'geolocation'})
@@ -179,11 +186,11 @@ function getCurrentPosition() {
   .then(resp => {
     return resp.json();
   }).then(json => {
-    currentLocation = new Local(json.lat, json.lon);
+    currentLocation = new Local(json.latitude, json.longitude);
     getCity(currentLocation.lat, currentLocation.lon)
     .then(data=>{
       currentLocation.city = data.address.city;
-      currentLocation.region = data.address.state;
+      currentLocation.region = data.address.region;
       document.dispatchEvent(currentLocationUpdated);
     })
   }).catch(err => {
@@ -197,7 +204,7 @@ async function getCurrentPositionCallback(pos) {
   getCity(currentLocation.lat, currentLocation.lon)
   .then(data=>{
     currentLocation.city = data.address.city;
-    currentLocation.region = data.address.state;
+    currentLocation.region = data.address.region;
     document.dispatchEvent(currentLocationUpdated);
   })
   .catch(err => {
@@ -241,6 +248,7 @@ function handleForwardLookup(card, resp, index) {
       console.log('argh, you rotated before rendering');
       return;
     }
+    addAnimations();
     renderWeather(frontCardId, index);
   }
 }
@@ -303,6 +311,16 @@ function get24Hour(ms) {
   return hour;
 }
 
+function applyTimeZone(index, ms) {
+  if (!myLocals[index].weather) return ms;
+  var myZone = myLocals[0].weather.offset;
+  var yourZone = myLocals[index].weather.offset;
+  var diff = yourZone - myZone;
+  var msDelta = diff * 3600000;
+  return ms + msDelta;
+  
+}
+
 /** Card Rotation State *******************************************************/
 function rotateLeft (cards) {
   if (myLocals.length + cards.a.position > 0) {
@@ -362,6 +380,13 @@ function cardAnimation(cards) {
 // Blank Weather Card
 function renderBlankCard(cardId) {
   var card = document.getElementById(cardId);
+  /* reset background to daylight */
+  card.classList.remove('twilight', 'nighttime');
+  card.classList.add('daytime');
+  card.querySelector('.daytime').setAttribute('vanish', false);
+  card.querySelector('.nighttime').setAttribute('vanish', true);
+  card.querySelector('.twilight').setAttribute('vanish', true);
+  /*******************************/
   card.querySelector('.city').value = '';
   card.querySelector('.city').placeholder = 'Enter Location';
   card.querySelector('.city').classList.remove('filled');
@@ -373,8 +398,8 @@ function renderBlankCard(cardId) {
   renderWeeklyBlank(card);
 }
 function renderHourlyBlank(card) {
-  card.querySelector('.summary .day').innerText = getShortDay(new Date());
-  card.querySelector('.summary .time').innerText = getHour(new Date());
+  card.querySelector('.summary .day').innerText = getShortDay(applyTimeZone(0, (new Date()).getTime()));
+  card.querySelector('.summary .time').innerText = getHour(applyTimeZone(0, (new Date()).getTime()));
   card.querySelector('.summary .weather-summary').innerText = '';
   card.querySelector('.todays-forecast .weather-icon').className = `weather-icon`;
   card.querySelector('.todays-forecast .temp').innerText = '--';
@@ -387,7 +412,7 @@ function renderWeeklyBlank(card) {
   var li = card.querySelectorAll('.week li');
   var today = new Date();
   for (let index=0; index<li.length; index++) {
-    li[index].querySelector('.day').innerText = getDay(today.setDate(today.getDate()+(index*1)));
+    li[index].querySelector('.day').innerText = getDay(applyTimeZone(0,today.setDate(today.getDate()+(index*1))));
     li[index].querySelector('.weather-icon').className = `weather-icon`;
     li[index].querySelector('.temp .hi').innerText = '--';
     li[index].querySelector('.temp .lo').innerText = '--';
@@ -401,15 +426,15 @@ function renderDownloadCard(cardId, index) {
   // card.querySelector('.city').style.pointerEvents = 'none';
   // card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
-  card.querySelector('.week-forecast .forecast').innerText = 'Getting weather...';
+  card.querySelector('.week-forecast .forecast').innerText = '';
   renderFavorites(cardId, index);
   renderHourlyDownload(card);
-  renderWeeklyDownload(card);
+  // renderWeeklyDownload(card);
 }
 function renderHourlyDownload(card) {
-  card.querySelector('.summary .day').innerText = getShortDay(new Date());
-  card.querySelector('.summary .time').innerText = getHour(new Date());
-  card.querySelector('.summary .weather-summary').innerText = 'Getting weather';
+  card.querySelector('.summary .day').innerText = getShortDay(applyTimeZone(0, (new Date()).getTime()));
+  card.querySelector('.summary .time').innerText = getHour(applyTimeZone(0, (new Date()).getTime()));
+  card.querySelector('.summary .weather-summary').innerText = '';
   card.querySelector('.todays-forecast .weather-icon').className = `weather-icon unknown`;
   card.querySelector('.todays-forecast .temp').innerText = '--';
   card.querySelector('.todays-forecast .precip').innerText = '--';
@@ -421,7 +446,7 @@ function renderWeeklyDownload(card) {
   var li = card.querySelectorAll('.week li');
   var today = new Date();
   for (let index=0; index<li.length; index++) {
-    li[index].querySelector('.day').innerText = getDay(today.setDate(today.getDate()+(index*1)));
+    li[index].querySelector('.day').innerText = getDay(applyTimeZone(0,today.setDate(today.getDate()+(index*1))));
     li[index].querySelector('.weather-icon').className = `weather-icon unknown`;
     li[index].querySelector('.temp .hi').innerText = '--';
     li[index].querySelector('.temp .lo').innerText = '--';
@@ -437,6 +462,7 @@ async function renderWeather(cardId, index) {
   renderFavorites(cardId, index);
 
   if (!myLocals[index].weather) {
+    addAnimations();
     renderDownloadCard(cardId, index)
     await myLocals[index].fetchWeather();
   }
@@ -463,9 +489,9 @@ function renderFavorites(cardId, index = null) {
     fav.classList.remove('clicked', 'animate', 'hidden');
 }
 function renderHourly(card, index, h) {
-  var sunrise = get24Hour(myLocals[index].weather.daily.data[0].sunriseTime * 1000);
-  var sunset = get24Hour(myLocals[index].weather.daily.data[0].sunsetTime * 1000);
-  var currentHour = get24Hour(myLocals[index].weather.hourly.data[h].time*1000);
+  var sunrise = get24Hour(applyTimeZone(index, myLocals[index].weather.daily.data[0].sunriseTime * 1000));
+  var sunset = get24Hour(applyTimeZone(index, myLocals[index].weather.daily.data[0].sunsetTime * 1000));
+  var currentHour = get24Hour(applyTimeZone(index, myLocals[index].weather.hourly.data[h].time*1000));
   if (currentHour === sunset || currentHour === sunrise) {
     card.classList.remove('daytime', 'nighttime');
     card.classList.add('twilight')
@@ -487,8 +513,9 @@ function renderHourly(card, index, h) {
     card.querySelector('.nighttime').setAttribute('vanish', false);
     card.querySelector('.twilight').setAttribute('vanish', true);
   }
-  card.querySelector('.summary .day').innerText = getShortDay(myLocals[index].weather.hourly.data[h].time*1000);
-  card.querySelector('.summary .time').innerText = getHour(myLocals[index].weather.hourly.data[h].time*1000);
+
+  card.querySelector('.summary .day').innerText = getShortDay(applyTimeZone(index, myLocals[index].weather.hourly.data[h].time*1000));
+  card.querySelector('.summary .time').innerText = getHour(applyTimeZone(index, myLocals[index].weather.hourly.data[h].time*1000));
   card.querySelector('.summary .weather-summary').innerText = myLocals[index].weather.hourly.data[h].summary;
   card.querySelector('.todays-forecast .weather-icon').className = `weather-icon ${myLocals[index].weather.hourly.data[h].icon}`;
   card.querySelector('.todays-forecast .temp').innerText = Math.round(myLocals[index].weather.hourly.data[h].temperature);
@@ -499,11 +526,11 @@ function renderHourly(card, index, h) {
 }
 function renderWeekly(card, index) {
   var li = card.querySelectorAll('.week li');
-  myLocals[index].weather.daily.data.forEach((day, index)=> {
-    li[index].querySelector('.day').innerText = getDay(day.time*1000);
-    li[index].querySelector('.weather-icon').className = `weather-icon ${day.icon}`;
-    li[index].querySelector('.temp .hi').innerText = Math.round(day.temperatureHigh);
-    li[index].querySelector('.temp .lo').innerText = Math.round(day.temperatureLow);
+  myLocals[index].weather.daily.data.forEach((day, i)=> {
+    li[i].querySelector('.day').innerText = getDay(applyTimeZone(index,day.time*1000));
+    li[i].querySelector('.weather-icon').className = `weather-icon ${day.icon}`;
+    li[i].querySelector('.temp .hi').innerText = Math.round(day.temperatureHigh);
+    li[i].querySelector('.temp .lo').innerText = Math.round(day.temperatureLow);
   })
 }
 
@@ -549,9 +576,12 @@ window.addEventListener('keydown', e => {
       console.log('delete card');
       removeAnimations();
       animateDelete(findFrontCard(cards));
-      deleteCard(myLocals, index)
-      updateFrontCard(cards);
-      cardAnimation(cards);
+      //this prevents re-rendering card data till card is off screen
+      setTimeout( () => {
+        deleteCard(myLocals, index);
+        updateFrontCard(cards);
+        cardAnimation(cards);
+      },400);
     }
   }
 })
@@ -568,7 +598,7 @@ function animateDelete(cardId) {
 var sliders = document.querySelectorAll('.slider');
 for (let i=0; i<sliders.length; i++) {
   sliders[i].addEventListener('input', (e) => {
-    addAnimatetions();
+    addAnimations();
     var card = e.target.parentNode.parentNode
     var index = getIndex(cards);
     myLocals[index].sliderPos = e.target.value;
@@ -653,9 +683,12 @@ function onTouchMove (e) {
         console.log('delete card');
         removeAnimations();
         animateDelete(findFrontCard(cards));
-        deleteCard(myLocals, index)
-        updateFrontCard(cards);
-        cardAnimation(cards);
+        //this prevents re-rendering card data till card is off screen
+        setTimeout( () => {
+          deleteCard(myLocals, index);
+          updateFrontCard(cards);
+          cardAnimation(cards);
+        },400);
         document.removeEventListener("touchmove", onTouchMove)
       }
     }
@@ -665,7 +698,7 @@ function onTouchMove (e) {
 /* add/removeAnimations() are necissary so that cards
  * do not animate or transition while "flipping" the cards
  */
-function addAnimatetions() {
+function addAnimations() {
   if (!document.documentElement.classList.contains('animate'))
     document.documentElement.classList.add('animate');
 }
