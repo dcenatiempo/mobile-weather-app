@@ -13,7 +13,7 @@ if (navigator.vendor.indexOf('Apple') >= 0) {
 
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 class Local {
   constructor(lat, lon) {
@@ -136,8 +136,8 @@ myLocals = loadLocalStorage('myLocals');
 
 (function initialTime(){
   var card = document.querySelector('#a');
-  card.querySelector('.summary .day').innerText = getShortDay(applyTimeZone(0, (new Date()).getTime()));
-  card.querySelector('.summary .time').innerText = getHour(applyTimeZone(0, (new Date()).getTime()));
+  card.querySelector('.summary .day').innerText = getShortDay((new Date()).getTime());
+  card.querySelector('.summary .time').innerText = getHour((new Date()).getTime());
 })();
 
 /* 2) get weather for all locations */
@@ -314,7 +314,6 @@ function getShortDay(ms) {
 }
 
 function getHour(ms) {
-  debugger
   var d = new Date(ms);
   var hour = d.getHours();
   return (hour%12 === 0 ? '12' : hour%12) + (hour>=12?' PM': ' AM');
@@ -326,6 +325,8 @@ function get24Hour(ms) {
 }
 
 function applyTimeZone(index, ms) {
+  if (!myLocals) return;
+  if (!myLocals[0]) return
   if (!myLocals[index].weather) return ms;
   var myZone = myLocals[0].weather.offset;
   var yourZone = myLocals[index].weather.offset;
