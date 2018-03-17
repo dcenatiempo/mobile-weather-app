@@ -22,83 +22,125 @@ body {
   position: absolute;
 }
 #a {
-  /* background-color: white; */
   transform: rotateY(0deg);
 }
 #b {
-  /* background-color: white; */
   transform: rotateY(180deg);
 }
 .front {
-  transition: transform .5s, visibility 0s linear .1625s;
-  -webkit-transition: transform .5s, visibility 0s linear .1625s;
+  transition: transform .5s, visibility 0s linear .15s;
+  -webkit-transition: transform .5s, visibility 0s linear .15s;
   visibility: visible;
 }
 .back {
-  transition: transform .5s, visibility 0s linear .1625s;
-  -webkit-transition: transform .5s, visibility 0s linear .1625s;
+  transition: transform .5s, visibility 0s linear .15s;
+  -webkit-transition: transform .5s, visibility 0s linear .15s;
    visibility: hidden;
 }
-div.background {
+.animate div.background {
   transition: opacity 2s;
+}
+div.background {
   position: absolute;
   width: 100%;
   height: 100%;
   z-index: -1;
 }
-div.background[vanish=false] {
-  opacity: 1;
-}
-div.background[vanish=true] {
+[time=twilight]  div.background.daytime,
+[time=twilight]  div.background.nighttime,
+[time=daytime]   div.background.twilight,
+[time=daytime]   div.background.nighttime,
+[time=nighttime] div.background.daytime,
+[time=nighttime] div.background.twilight {
   opacity: 0;
 }
+div.background {
+  opacity: 1;
+}
 div.white {
-  background-color: white;
+  background: linear-gradient(rgb(142, 120, 184), rgb(255, 234, 114));
 }
 div.daytime {
   background: linear-gradient(#b9e3ff, #f7fdff);
 }
 div.twilight {
-  background: linear-gradient(rgb(142, 120, 184), rgb(255, 217, 0));
+  background: linear-gradient(rgb(142, 120, 184), rgb(255, 234, 114));
 }
 div.nighttime {
-  background: linear-gradient(rgb(21, 19, 31), rgb(44, 39, 81));
+  background: linear-gradient(rgb(21, 19, 31), rgb(47, 39, 107));
 }
-.daytime section, .daytime section input{
-  color: rgb(31, 31, 31);
-  transition: color 2s;
+
+/******************************************************/
+[time=daytime] section{
+  color: black;
 }
-.daytime .weather-icon {
-  /* filter: invert(69%) sepia(76%) hue-rotate(19deg); */
-  transition: filter 2s;
+[time=daytime] section input{
+  color: black;
 }
-.daytime .lo {
-  transition: background-color 2s, color 1s;
+.safari [time=daytime] section input{
+  -webkit-text-fill-color:black;
+  color: initial;
 }
-.twilight section, .twilight section input{
-  color: rgb(31, 31, 31);
-  transition: color 2s;
+[time=daytime] .weather-icon {
+  /* filter: invert(0%) sepia(2%) saturate(5993%) hue-rotate(329deg) brightness(110%) contrast(76%); */
 }
-.twilight .lo {
+[time=daytime] .lo {
   color: rgb(103, 103, 103);
-  transition: color 2s;
 }
-.twilight .weather-icon {
-  /* filter: invert(70%) sepia(100%) hue-rotate(0deg); */
-  transition: filter 2s;
+[time=twilight] section {
+  color: black;
 }
-.nighttime section, .nighttime section input{
+[time=twilight] section input{
+  color: black;
+}
+.safari [time=twilight] section input{
+  -webkit-text-fill-color: black;
+  color: initial;
+}
+[time=twilight] .lo {
+  color: rgb(103, 103, 103);
+}
+[time=twilight] .weather-icon {
+  /* filter: invert(0%) sepia(2%) saturate(5993%) hue-rotate(329deg) brightness(110%) contrast(76%); */
+}
+[time=nighttime] section{
   color: #dfdfb2;
-  transition: color 2s;
 }
-.nighttime .lo {
+[time=nighttime] section input{
+  color: #dfdfb2;
+}
+.safari [time=nighttime] section input{
+  -webkit-text-fill-color: #dfdfb2;
+  color: initial;
+}
+[time=nighttime] .lo {
   color: rgb(131, 126, 104);
+}
+[time=nighttime] .weather-icon {
+  filter: invert(69%) sepia(76%) saturate(100%) hue-rotate(19deg) brightness(100%) contrast(100%);
+}
+
+/*****************************************/
+.animate section input {
+  transition: color 2s, -webkit-text-fill-color 2s;
+}
+
+.animate [time=daytime] section,
+.animate [time=nighttime] section,
+.animate [time=twilight] section,
+.animate [time=daytime] .lo,
+.animate [time=nighttime] .lo,
+.animate [time=twilight] .lo {
   transition: color 2s;
 }
-.nighttime .weather-icon {
-  filter: invert(69%) sepia(76%) hue-rotate(19deg);
-  transition: filter 2s;
+
+.animate [time=daytime] .weather-icon,
+.animate [time=twilight] .weather-icon,
+.animate [time=nighttime] .weather-icon {
+  transition: filter 1.7s;
 }
+
+/****************************************/
 
 .lo {
   color: gray;
@@ -112,12 +154,9 @@ div.nighttime {
 
 /* Top Section */
 .todays-forecast {
-  /* GRID LAYOUT */
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  /***************/
   padding: .5rem;
-  /* background-color: white; */
   height: 75vw;
 }
 .city {
@@ -137,13 +176,12 @@ div.nighttime {
   grid-row: 2;
   grid-column: 1 / 4;
   font-size: 1.75rem;
-  /* color: gray; */
-  margin-bottom: 1rem;
 }
 .todays-forecast .temp {
   grid-row: 3;
   grid-column: 2 / 3;
   font-size: 4rem;
+  justify-self: center;
 }
 .details {
   grid-row: 3;
@@ -172,15 +210,12 @@ div.nighttime {
 .forecast {
   grid-column: 1 / 4;
   font-size: 1.1rem;
-  height: 2.5rem;
+  height: 3rem;
   overflow: auto;
 }
 .slider {
   grid-column: 1 / 4;
-  height: .5rem;
-  width: 80vw;
-  background-color: gray;
-  margin: 1rem auto;
+  background-color: transparent;
 }
 .handle {
   height:2rem;
@@ -191,8 +226,7 @@ div.nighttime {
 }
 /* Bottom Section */
 .week-forecast {
-  /* background-color: white; */
-  height: calc(100vh - 60vw);
+  height: calc(100vh - 75vw);
   overflow-y: auto;
   padding: .5rem;
 }
@@ -219,13 +253,15 @@ div.nighttime {
 .week-forecast .temp {
   justify-self: end;
 }
-/* Landscape, Mobile */
-
-/* Desktop */
 
 /* Weather Icons */
-.weather-icon {
-  
+[time=nighttime] .todays-forecast .clear-day,
+[time=nighttime] .todays-forecast .clear-night {
+  background-image: url('../images/Moon.svg');
+}
+[time=nighttime] .todays-forecast .partly-cloudy-day,
+[time=nighttime] .todays-forecast .partly-cloudy-night {
+  background-image: url('../images/Cloud-Moon.svg');
 }
 .todays-forecast .weather-icon {
   grid-row: 3;
@@ -281,118 +317,51 @@ div.nighttime {
 .unknown {
   background-image: url('../images/Unknown.svg');
 }
-/* styling for the range input */
-input[type=range] {
-  /*removes default webkit styles*/
-  -webkit-appearance: none;
-  
-  /*fix for FF unable to apply focus style bug */
-  border: 1px solid white;
-  
-  /*required for proper track sizing in FF*/
-  width: 80vw;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 80vw;
-  height: .5rem;
-  background: #ddd;
-  border: none;
-  border-radius: .75rem;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  border: none;
-  height: 2rem;
-  width: 1rem;
-  border-radius: 1rem;
-  background: gray;
-  margin-top: -.75rem;
-}
-input[type=range]:focus {
-  outline: none;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #ccc;
-}
-
-input[type=range]::-moz-range-track {
-  width: 80vw;
-  height: .5rem;
-  background: #ddd;
-  border: none;
-  border-radius: .75rem;
-}
-input[type=range]::-moz-range-thumb {
-  border: none;
-  height: 2rem;
-  width: 1rem;
-  border-radius: 1rem;
-  background: gray;
-}
-
-/*hide the outline behind the border*/
-input[type=range]:-moz-focusring{
-  outline: .25rem solid white;
-  outline-offset: -.25rem;
-}
-
-input[type=range]::-ms-track {
-  width: 80vw;
-  height: .5rem;
-  
-  /*remove bg colour from the track, we'll use ms-fill-lower and ms-fill-upper instead */
-  background: transparent;
-  
-  /*leave room for the larger thumb to overflow with a transparent border */
-  border-color: transparent;
-  border-width: 1.5rem 0;
-
-  /*remove default tick marks*/
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #777;
-  border-radius: 1rem;
-}
-input[type=range]::-ms-fill-upper {
-  background: #ddd;
-  border-radius: 1rem;
-}
-input[type=range]::-ms-thumb {
-  border: none;
-  height: 2rem;
-  width: 1rem;
-  border-radius: 1rem;
-  background: gray;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #888;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #ccc;
-}
 
 .delete {
   animation-name: delete;
   animation-duration: 1s;
   animation-iteration-count: 1;
 }
-.favorite {
+button.favorite {
   grid-column: 3 / 4;
   grid-row: 1;
-  padding: 10px;
-  background-color: white;
-  border: solid;
+  padding: 1rem 0;
+  background-color: transparent;
+  border: none;
   z-index: 100;
   align-self: flex-start;
   justify-self: flex-end;
+  font-size: 3rem;
+  line-height: 1.5rem;
+  filter: invert(70%) opacity(.3);
   color: black;
+  -webkit-text-fill-color: black;
+}
+.no-touch .favorite:hover {
+  filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
 }
 .favorite.clicked {
-  background-color: goldenrod;
+  filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
+}
+.animate .favorite.animate {
+  animation-name: favorite;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
 }
 .favorite.hidden {
   display: none;
+}
+@keyframes favorite {
+  10% {
+    transform: scale(.7, .7);
+  }
+  45% {
+    transform: scale(2, 2);
+  }
+  80% {
+    transform: scale(.9, .9);
+  }
 }
 
 @keyframes delete {
@@ -407,5 +376,114 @@ input[type=range]:focus::-ms-fill-upper {
   }
   100% {
     transform: translate(0px, 0px);
+  }
+}
+
+/* Range Input Slider Styling */
+input[type=range].slider {
+  -webkit-appearance: none;
+  width: 80%;
+  margin: 1rem auto;
+}
+input[type=range].slider:focus {
+  outline: none;
+}
+input[type=range].slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: .075rem;
+  cursor: pointer;
+  background: #828282;
+}
+input[type=range].slider::-webkit-slider-thumb {
+  opacity: .5;
+  box-shadow: 1.6px 1.6px 7.9px rgba(0, 0, 0, 0.5);
+  height: 2.5rem;
+  width: 1.5rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -1.1875rem;
+}
+input[type=range].slider:focus::-webkit-slider-runnable-track {
+  background: #828282;
+}
+input[type=range].slider::-moz-range-track {
+  width: 100%;
+  height: .075rem;
+  cursor: pointer;
+  background: #828282;
+}
+input[type=range].slider::-moz-range-thumb {
+  opacity: .5;
+  box-shadow: 1.6px 1.6px 7.9px rgba(0, 0, 0, 0.5);
+  height: 2.5rem;
+  width: 1.5rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  cursor: pointer;
+}
+input[type=range].slider::-ms-track {
+  width: 100%;
+  height: .075rem;
+  cursor: pointer;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+input[type=range].slider::-ms-fill-lower {
+  background: #828282;
+  border-radius: 50%;
+  box-shadow: 1.2px 1.2px 1px rgba(0, 0, 0, 0), 0px 0px 1.2px rgba(13, 13, 13, 0);
+}
+input[type=range].slider::-ms-fill-upper {
+  background: #828282;
+  border-radius: 50%;
+  box-shadow: 1.2px 1.2px 1px rgba(0, 0, 0, 0), 0px 0px 1.2px rgba(13, 13, 13, 0);
+}
+input[type=range].slider::-ms-thumb {
+  opacity: .5;
+  box-shadow: 1.6px 1.6px 7.9px rgba(0, 0, 0, 0.5);
+  height: 2.5rem;
+  width: 1.5rem;
+  border-radius: 1.5rem;
+  background: #ffffff;
+  cursor: pointer;
+  height: 1px;
+}
+input[type=range].slider:focus::-ms-fill-lower {
+  background: #828282;
+}
+input[type=range].slider:focus::-ms-fill-upper {
+  background: #828282;
+}
+[status=blank] .weather-icon,
+[status=blank] .temp,
+[status=blank] .details,
+[status=blank] .forecast,
+[status=blank] .slider,
+[status=blank] .week-forecast,
+[status=downloading] .week-forecast,
+[status=downloading] .details,
+[status=downloading] .forecast,
+[status=downloading] .slider {
+  visibility: hidden;
+}
+
+/* Desktop */
+@media screen and (min-width: 550px) {
+  html{
+    font-size: 22px;
+  }
+  main.city-page {
+    width: 550px;
+    left: calc(100vw/2 - 275px);
+  }
+  main.city-page .todays-forecast {
+    height: 412.4px;
+  }
+  .week-forecast {
+    height: calc(100vh - 412.5px);
+    max-height: 700px;
   }
 }
