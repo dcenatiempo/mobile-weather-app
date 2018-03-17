@@ -334,6 +334,11 @@ function applyTimeZone(index, ms) {
   var msDelta = diff * 3600000;
   return ms + msDelta;
 }
+function get24Hour(ms) {
+  var d = new Date(ms);
+  var hour = d.getHours();
+  return hour;
+}
 
 /** Card Rotation State *******************************************************/
 function rotateLeft (cards) {
