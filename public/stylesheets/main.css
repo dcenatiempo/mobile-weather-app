@@ -28,13 +28,13 @@ body {
   transform: rotateY(180deg);
 }
 .front {
-  transition: transform .5s, visibility 0s linear .1625s;
-  -webkit-transition: transform .5s, visibility 0s linear .1625s;
+  transition: transform .5s, visibility 0s linear .15s;
+  -webkit-transition: transform .5s, visibility 0s linear .15s;
   visibility: visible;
 }
 .back {
-  transition: transform .5s, visibility 0s linear .1625s;
-  -webkit-transition: transform .5s, visibility 0s linear .1625s;
+  transition: transform .5s, visibility 0s linear .15s;
+  -webkit-transition: transform .5s, visibility 0s linear .15s;
    visibility: hidden;
 }
 .animate div.background {
