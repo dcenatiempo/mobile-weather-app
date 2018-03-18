@@ -645,7 +645,7 @@ for (let i=0; i<cityInput.length; i++) {
   })
 }
 
-// Swiping Left/Right
+// Swiping Left/Right/Up
 document.addEventListener("touchstart", (e)=> {
   if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
     document.addEventListener("touchmove", onTouchMove)
@@ -689,7 +689,7 @@ function onTouchMove (e) {
   else {
     console.log('y wins!')
     console.log(yVelocity)
-    if (yVelocity < -.5) {
+    if (yVelocity < -1) {
       var index = getIndex(cards);
       if (index >= myLocals.length)
         console.log('cannot delete this card')
