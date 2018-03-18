@@ -9,6 +9,16 @@
 if (navigator.vendor.indexOf('Apple') >= 0) {
   console.log('you are on safari');
   document.documentElement.classList.add('safari');
+  
+  window.addEventListener("load",function() {
+    // Set a timeout...
+    setTimeout(function(){
+      // Hide the address bar!
+      window.scrollTo(0, 1);
+    }, 0);
+  });
+
+
 }
 
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
