@@ -9,6 +9,26 @@
 if (navigator.vendor.indexOf('Apple') >= 0) {
   console.log('you are on safari');
   document.documentElement.classList.add('safari');
+  
+  window.addEventListener("load",function() {
+    // Set a timeout...
+    setTimeout(function(){
+      // Hide the address bar!
+      window.scrollTo(0, 1);
+    }, 0);
+  });
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
+      // Registration was successful
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      // registration failed :(
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
 }
 
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
@@ -635,7 +655,7 @@ for (let i=0; i<cityInput.length; i++) {
   })
 }
 
-// Swiping Left/Right
+// Swiping Left/Right/Up
 document.addEventListener("touchstart", (e)=> {
   if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
     document.addEventListener("touchmove", onTouchMove)
@@ -679,7 +699,7 @@ function onTouchMove (e) {
   else {
     console.log('y wins!')
     console.log(yVelocity)
-    if (yVelocity < -.5) {
+    if (yVelocity < -1) {
       var index = getIndex(cards);
       if (index >= myLocals.length)
         console.log('cannot delete this card')
