@@ -33,7 +33,7 @@ if ('serviceWorker' in navigator) {
 
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = devUrl;
+var appUrl = prodUrl;
 
 class Local {
   constructor(lat, lon) {
