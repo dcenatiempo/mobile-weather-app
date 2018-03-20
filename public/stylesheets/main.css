@@ -344,7 +344,7 @@ button.favorite {
 .favorite.clicked {
   filter: invert(90%) sepia(14%) saturate(7297%) hue-rotate(344deg) brightness(90%) contrast(89%);
 }
-.animate .favorite.animate {
+.favorite.animate {
   animation-name: favorite;
   animation-duration: 1s;
   animation-iteration-count: 1;
