@@ -6,7 +6,7 @@
   font-weight: normal;
 }
 html{
-  font-size: 4vmin;
+  font-size: 4vw;
 }
 body {
   perspective: 150vw;
@@ -180,6 +180,12 @@ div.nighttime {
   grid-row: 2;
   grid-column: 1 / 4;
   font-size: 1.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.summary .weather-summary {
+  font-size: 1.5rem;
 }
 .todays-forecast .temp {
   grid-row: 3;
