@@ -434,8 +434,7 @@ function renderBlankCard(cardId) {
   cityInput.placeholder = 'Enter Location';
   cityInput.classList.remove('filled');
   cityInput.disabled = false;
-  cityInput.focus();
-  debugger
+  // cityInput.focus();
   card.querySelector('.todays-forecast .summary .day').innerText = getShortDay(0, (new Date()).getTime());
   card.querySelector('.todays-forecast .summary .time').innerText = getHour(0, (new Date()).getTime());
   card.querySelector('.todays-forecast .summary .weather-summary').innerText = '';
@@ -595,15 +594,15 @@ window.addEventListener('keydown', e => {
   if (e.keyCode === 37) { // 'left arrow'
     removeAnimations();
     cards = rotateRight(cards);
-    updateFrontCard(cards);
     cardAnimation(cards);
+    updateFrontCard(cards);
     renderBreadcrumbs(cards);
   }
   else if (e.keyCode === 39) { // 'right arrow'
     removeAnimations();
     cards = rotateLeft(cards);
-    updateFrontCard(cards);
     cardAnimation(cards);
+    updateFrontCard(cards);
     renderBreadcrumbs(cards);
   }
   else if (e.keyCode === 8) { // 'delete'
@@ -617,8 +616,8 @@ window.addEventListener('keydown', e => {
       //this prevents re-rendering card data till card is off screen
       setTimeout( () => {
         deleteCard(myLocals, index);
-        updateFrontCard(cards);
         cardAnimation(cards);
+        updateFrontCard(cards);
         removeCrumb();
         renderBreadcrumbs(cards)
       },400);
@@ -696,15 +695,15 @@ function onTouchMove (e) {
     if (xVelocity > .5) {
       removeAnimations();
       cards = rotateRight(cards);
-      updateFrontCard(cards);
       cardAnimation(cards);
+      updateFrontCard(cards);
       renderBreadcrumbs(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else if (xVelocity < -.5) {
       removeAnimations();
       cards = rotateLeft(cards);
-      updateFrontCard(cards);
       cardAnimation(cards);
+      updateFrontCard(cards);
       renderBreadcrumbs(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else {
@@ -729,8 +728,8 @@ function onTouchMove (e) {
         //this prevents re-rendering card data till card is off screen
         setTimeout( () => {
           deleteCard(myLocals, index);
-          updateFrontCard(cards);
           cardAnimation(cards);
+          updateFrontCard(cards);
           removeCrumb();
           renderBreadcrumbs(cards);
         },400);
