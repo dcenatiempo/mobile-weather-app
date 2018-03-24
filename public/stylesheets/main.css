@@ -1,3 +1,15 @@
+html,
+body {
+  position: fixed;
+  overflow: hidden;
+}
+.mainwrapper {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  perspective: 150vw;
+}
 * {
   box-sizing: border-box;
   margin: 0;
@@ -9,9 +21,9 @@ html{
   font-size: 4vmin;
 }
 body {
-  perspective: 150vw;
+  /* perspective: 150vw;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; */
   background: linear-gradient(to top right, #e4e4e4, #ffffff);
 }
 /* Portrait, Mobile */

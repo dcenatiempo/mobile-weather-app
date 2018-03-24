@@ -4,15 +4,17 @@
   <% include ../partials/header.ejs %>
 </head>
 <body>
-  <main id="a" class="city-page front" time="daytime" status="downloading">
-    <% include ../partials/card.ejs %>
-  </main>
-  <main id="b" class="city-page back" time="daytime" status="blank">
-    <% include ../partials/card.ejs %>
-  </main>
-  <div id="card-scroll">
-    <div>
-      <div class="selected"></div>
+  <div class="mainwrapper">
+    <main id="a" class="city-page front" time="daytime" status="downloading">
+      <% include ../partials/card.ejs %>
+    </main>
+    <main id="b" class="city-page back" time="daytime" status="blank">
+      <% include ../partials/card.ejs %>
+    </main>
+    <div id="card-scroll">
+      <div>
+        <div class="selected"></div>
+      </div>
     </div>
   </div>
 </body>
