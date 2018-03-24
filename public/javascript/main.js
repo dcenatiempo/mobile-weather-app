@@ -153,6 +153,8 @@ function isLocalinArray(current) {
 
 /* 1) load local storage, if any */
 myLocals = loadLocalStorage('myLocals');
+//create breadcrumbs
+myLocals.forEach( l => addCrumb());
 
 (function initialTime(){
   var card = document.querySelector('#a');
@@ -201,15 +203,18 @@ if ("geolocation" in navigator) {
 /* When current location is fetched, do this*/
 async function currentLocationUpdated() {
   var index = isLocalinArray(currentLocation);
-  if (index !== false) {
+  var startLength = myLocals.length;
+  if (index !== false) { // current location already in saved
     myLocals.unshift(undefined);
     myLocals[0] = myLocals[index + 1]
     myLocals.splice(index + 1, 1);
     index = getIndex(cards);
+    if (startLength === 0) addCrumb();
   }
-  else {
+  else { // current location NOT in saved
     myLocals.unshift(undefined);
     myLocals[0] = new Weather(currentLocation);
+    addCrumb();
   }
   index = getIndex(cards);
   if (index === 0) // only render if on this card
@@ -283,6 +288,8 @@ function handleForwardLookup(cardId, resp, index) {
     }
     addAnimations();
     renderWeather(cardId, index);
+    addCrumb();
+    renderBreadcrumbs(cards);
   }
 }
 
@@ -427,7 +434,10 @@ function renderBlankCard(cardId) {
   cityInput.placeholder = 'Enter Location';
   cityInput.classList.remove('filled');
   cityInput.disabled = false;
-  cityInput.focus();
+  // cityInput.focus();
+  card.querySelector('.todays-forecast .summary .day').innerText = getShortDay(0, (new Date()).getTime());
+  card.querySelector('.todays-forecast .summary .time').innerText = getHour(0, (new Date()).getTime());
+  card.querySelector('.todays-forecast .summary .weather-summary').innerText = '';
   card.querySelector('.todays-forecast .forecast').innerText = '';
   card.querySelector('.week-forecast .forecast').innerText = '';
   renderFavorites(cardId);
@@ -435,8 +445,8 @@ function renderBlankCard(cardId) {
   renderWeeklyBlank(card);
 }
 function renderHourlyBlank(card) {
-  card.querySelector('.summary .day').innerText = getShortDay(applyTimeZone(0, (new Date()).getTime()));
-  card.querySelector('.summary .time').innerText = getHour(applyTimeZone(0, (new Date()).getTime()));
+  card.querySelector('.summary .day').innerText = getShortDay(0, (new Date()).getTime());
+  card.querySelector('.summary .time').innerText = getHour(0, (new Date()).getTime());
   card.querySelector('.summary .weather-summary').innerText = '';
   card.querySelector('.todays-forecast .weather-icon').className = `weather-icon`;
   card.querySelector('.todays-forecast .temp').innerText = '--';
@@ -558,6 +568,12 @@ function renderWeekly(card, index) {
 }
 
 /** Event Listeners ***********************************************************/
+// remove animate on resize
+window.addEventListener('resize', () => {
+  addResizing();
+  console.log('resizing!')
+})
+
 // remove hover effects if on touch device
 document.addEventListener('touchstart', function addtouchclass(e){ 
   document.documentElement.classList.remove('no-touch');
@@ -580,17 +596,22 @@ favorites.forEach(button => {
 });
 // Rotate with arrow keys
 window.addEventListener('keydown', e => {
+  if (myLocals.length === 0) return;
   if (e.keyCode === 37) { // 'left arrow'
     removeAnimations();
-    cards = rotateLeft(cards);
-    updateFrontCard(cards);
+    removeresizing();
+    cards = rotateRight(cards);
     cardAnimation(cards);
+    updateFrontCard(cards);
+    renderBreadcrumbs(cards);
   }
   else if (e.keyCode === 39) { // 'right arrow'
     removeAnimations();
-    cards = rotateRight(cards);
-    updateFrontCard(cards);
+    removeresizing();
+    cards = rotateLeft(cards);
     cardAnimation(cards);
+    updateFrontCard(cards);
+    renderBreadcrumbs(cards);
   }
   else if (e.keyCode === 8) { // 'delete'
     var index = getIndex(cards);
@@ -599,12 +620,15 @@ window.addEventListener('keydown', e => {
     else {
       console.log('delete card');
       removeAnimations();
+      removeresizing();
       animateDelete(findFrontCard(cards));
       //this prevents re-rendering card data till card is off screen
       setTimeout( () => {
         deleteCard(myLocals, index);
-        updateFrontCard(cards);
         cardAnimation(cards);
+        updateFrontCard(cards);
+        removeCrumb();
+        renderBreadcrumbs(cards)
       },400);
     }
   }
@@ -657,6 +681,7 @@ for (let i=0; i<cityInput.length; i++) {
 
 // Swiping Left/Right/Up
 document.addEventListener("touchstart", (e)=> {
+  if (myLocals.length === 0) return;
   if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
     document.addEventListener("touchmove", onTouchMove)
   }
@@ -678,15 +703,19 @@ function onTouchMove (e) {
     console.log(xVelocity)
     if (xVelocity > .5) {
       removeAnimations();
+      removeresizing();
       cards = rotateRight(cards);
-      updateFrontCard(cards);
       cardAnimation(cards);
+      updateFrontCard(cards);
+      renderBreadcrumbs(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else if (xVelocity < -.5) {
       removeAnimations();
+      removeresizing();
       cards = rotateLeft(cards);
+      cardAnimation(cards);
       updateFrontCard(cards);
-      cardAnimation(cards)
+      renderBreadcrumbs(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else {
       touchStart = {
@@ -706,12 +735,15 @@ function onTouchMove (e) {
       else {
         console.log('delete card');
         removeAnimations();
+        removeresizing();
         animateDelete(findFrontCard(cards));
         //this prevents re-rendering card data till card is off screen
         setTimeout( () => {
           deleteCard(myLocals, index);
-          updateFrontCard(cards);
           cardAnimation(cards);
+          updateFrontCard(cards);
+          removeCrumb();
+          renderBreadcrumbs(cards);
         },400);
         document.removeEventListener("touchmove", onTouchMove)
       }
@@ -730,4 +762,33 @@ function addAnimations() {
 function removeAnimations() {
   if (document.documentElement.classList.contains('animate'))
     document.documentElement.classList.remove('animate');
+}
+function addResizing() {
+  if (!document.documentElement.classList.contains('resizing'))
+    document.documentElement.classList.add('resizing');
+}
+
+function removeresizing() {
+  if (document.documentElement.classList.contains('resizing'))
+    document.documentElement.classList.remove('resizing');
+}
+
+/* Breadcrumbs/Scrollbar functionality */
+function renderBreadcrumbs(cards){
+  var crumbs = document.querySelectorAll("#card-scroll > div");
+  crumbs.forEach(crumb => crumb.classList.remove("selected"));
+
+  var selected = getIndex(cards);
+  crumbs[selected].classList.add("selected");
+}
+
+function addCrumb() {
+  var container = document.querySelector("#card-scroll");
+  var crumb = document.createElement('div');
+  container.appendChild(crumb);
+}
+
+function removeCrumb() {
+  var firstCrumb = document.querySelector("#card-scroll > div");
+  firstCrumb.remove();
 }

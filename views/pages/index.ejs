@@ -4,12 +4,21 @@
   <% include ../partials/header.ejs %>
 </head>
 <body>
-  <main id="a" class="city-page front" time="daytime" status="downloading">
-    <% include ../partials/card.ejs %>
-  </main>
-  <main id="b" class="city-page back" time="daytime" status="blank">
-    <% include ../partials/card.ejs %>
-  </main>
+  <div class="mainwrapper">
+    <main id="a" class="city-page front" time="daytime" status="downloading">
+      <% include ../partials/card.ejs %>
+    </main>
+    <main id="b" class="city-page back" time="daytime" status="blank">
+      <% include ../partials/card.ejs %>
+    </main>
+    <div id="menu-bar">
+      <button><img src="../images/geo-location.png"></button>
+      <div id="card-scroll">
+        <div class="selected"></div>
+      </div>
+      <button>☰</button>
+    </div>
+  </div>
 </body>
 <% include ../partials/scripts.ejs %>
 </html>

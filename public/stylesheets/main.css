@@ -5,24 +5,31 @@
   font-family: Helvetica, sans-serif;
   font-weight: normal;
 }
-html{
-  font-size: 4vw;
-}
+html,
 body {
-  perspective: 150vw;
+  position: fixed;
+  overflow: hidden;
+}
+html{
+  font-size: 4vmin;
+}
+.mainwrapper {
+  width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: linear-gradient(to top right, #e4e4e4, #ffffff);
+  -webkit-overflow-scrolling: touch;
+  background: linear-gradient(to top right, #d2d2d2, #ffffff);
+  perspective: 150vw;
+  -webkit-perspective: 150vw;
 }
+
 /* Portrait, Mobile */
 .city-page {
-  max-height: 100vh;
-  height: 57rem;
+  height: calc(100vh - 40px);
   width: 25rem;
   overflow: hidden;
-  position: absolute;
-  box-shadow: 1rem 1rem 2rem rgba(156, 156, 156, 0.5);
-  left: calc(100vw/2 - 12.5rem);
+  box-shadow: 1rem -2rem 2rem rgba(156, 156, 156, 0.5);
+  margin: auto;
 }
 #a {
   transform: rotateY(0deg);
@@ -31,15 +38,22 @@ body {
   transform: rotateY(180deg);
 }
 .front {
-  transition: box-shadow .5s transform .5s, visibility 0s linear .15s;
-  -webkit-transition: box-shadow .5s, transform .5s, visibility 0s linear .15s;
-  visibility: visible;
+  transition: box-shadow .5s, transform .5s, height 0s linear .15s;
+  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
 }
 .back {
-  transition: box-shadow .5s transform .5s, visibility 0s linear .15s;
-  -webkit-transition: box-shadow .5s, transform .5s, visibility 0s linear .15s;
-   visibility: hidden;
-   box-shadow: 10rem 1rem 2rem #9c9c9c;
+  transition: box-shadow .5s, transform .5s, height 0s linear .15s;
+  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
+   height: 0;
+   box-shadow: 10rem -2rem 2rem #9c9c9c;
+}
+.resizing .front {
+  transition: initial;
+  -webkit-transition: initial;
+}
+resizing .back {
+  transition: initial;
+  -webkit-transition: initial;
 }
 .animate div.background {
   transition: opacity 2s;
@@ -486,20 +500,71 @@ input[type=range].slider:focus::-ms-fill-upper {
     font-size: 22px;
   }
 }
-@media screen and (max-height: 50rem) and (min-aspect-ratio: 11/16){
+@media screen and (max-height: 50rem) and (min-aspect-ratio: 44/64){
   html {
     font-size: 2.75vh;
   }
 }
 
+/**** Scrollbar Styling ****/
 *::-webkit-scrollbar {
   width: .3rem;
 }
-
 *::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.2);
 }
-
 *::-webkit-scrollbar-thumb {
 background-color: rgba(169, 169, 169, 0.55);
+}
+
+/**** Weather Card Number-indicator/Scrollbar ****/
+#menu-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 40px;
+  margin: auto;
+  background: rgb(245, 245, 245);
+  display: flex;
+  justify-content: center;
+  transform: translateZ(0);
+  padding: 0 1rem;
+}
+#card-scroll {
+  width: calc(100vw - 80px);
+  max-width: calc(550px - 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#card-scroll > div {
+  min-height: 6px;
+  min-width: 6px;
+  height: .7rem;
+  width: .7rem;
+  margin: 0 .2rem;
+  border: .1rem solid rgb(131, 131, 131);
+  border-radius: .5rem;
+  background: transparent;
+  opacity: .8;
+  box-shadow: 1rem 1rem 2rem rgba(156, 156, 156, 0.5);
+}
+#card-scroll .selected {
+  background: rgb(160, 160, 160);
+}
+#menu-bar button {
+  height: 40px;
+  width: 40px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 0;
+  opacity: .4;
+}
+.no-touch #menu-bar button:hover {
+  opacity: .8;
+}
+#menu-bar button img {
+  height: 30px;
+  width: 30px;
 }
