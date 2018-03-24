@@ -16,21 +16,19 @@ html{
 .mainwrapper {
   width: 100vw;
   height: 100vh;
-  overflow-y: scroll;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
-  background: linear-gradient(to top right, #6f6f6f, #ffffff);
+  background: linear-gradient(to top right, #d2d2d2, #ffffff);
   perspective: 150vw;
+  -webkit-perspective: 150vw;
 }
 
 /* Portrait, Mobile */
 .city-page {
-  max-height: 94vh;
-  height: 57rem;
+  height: calc(100vh - 40px);
   width: 25rem;
   overflow: hidden;
-  /* position: absolute; */
   box-shadow: 1rem 1rem 2rem rgba(156, 156, 156, 0.5);
-  /* left: calc(100vw/2 - 12.5rem); */
   margin: auto;
 }
 #a {
@@ -42,13 +40,20 @@ html{
 .front {
   transition: box-shadow .5s, transform .5s, height 0s linear .15s;
   -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
-  /* visibility: visible; */
 }
 .back {
   transition: box-shadow .5s, transform .5s, height 0s linear .15s;
   -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
    height: 0;
    box-shadow: 10rem 1rem 2rem #9c9c9c;
+}
+.resizing .front {
+  transition: initial;
+  -webkit-transition: initial;
+}
+resizing .back {
+  transition: initial;
+  -webkit-transition: initial;
 }
 .animate div.background {
   transition: opacity 2s;
@@ -513,27 +518,26 @@ background-color: rgba(169, 169, 169, 0.55);
 }
 
 /**** Weather Card Number-indicator/Scrollbar ****/
-#card-scroll {
-  max-height: 34rem;
-  /* height: 57rem; */
-  width: 20rem;
-  /* transform: translateZ(500px); */
-  /* position: fixed; */
-  /* left: calc(100vw/2 - 10rem); */
-  margin: auto;
-  pointer-events: none;
-}
-#card-scroll > div {
-  margin-bottom: 1rem;
-  /* position: absolute; */
-  /* bottom: 0; */
-  height: 2rem;
+#menu-bar {
+  position: fixed;
+  bottom: 0;
   width: 100%;
+  height: 40px;
+  margin: auto;
+  background: rgb(245, 245, 245);
+  display: flex;
+  justify-content: center;
+  transform: translateZ(0);
+  padding: 0 1rem;
+}
+#card-scroll {
+  width: calc(100vw - 80px);
+  max-width: calc(550px - 80px);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-#card-scroll > div > div {
+#card-scroll > div {
   height: .7rem;
   width: .7rem;
   margin: 0 .2rem;
@@ -545,4 +549,20 @@ background-color: rgba(169, 169, 169, 0.55);
 }
 #card-scroll .selected {
   background: rgb(160, 160, 160);
+}
+#menu-bar button {
+  height: 40px;
+  width: 40px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  line-height: 0;
+  opacity: .4;
+}
+.no-touch #menu-bar button:hover {
+  opacity: .8;
+}
+#menu-bar button img {
+  height: 30px;
+  width: 30px;
 }

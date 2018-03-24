@@ -568,6 +568,12 @@ function renderWeekly(card, index) {
 }
 
 /** Event Listeners ***********************************************************/
+// remove animate on resize
+window.addEventListener('resize', () => {
+  addResizing();
+  console.log('resizing!')
+})
+
 // remove hover effects if on touch device
 document.addEventListener('touchstart', function addtouchclass(e){ 
   document.documentElement.classList.remove('no-touch');
@@ -593,6 +599,7 @@ window.addEventListener('keydown', e => {
   if (myLocals.length === 0) return;
   if (e.keyCode === 37) { // 'left arrow'
     removeAnimations();
+    removeresizing();
     cards = rotateRight(cards);
     cardAnimation(cards);
     updateFrontCard(cards);
@@ -600,6 +607,7 @@ window.addEventListener('keydown', e => {
   }
   else if (e.keyCode === 39) { // 'right arrow'
     removeAnimations();
+    removeresizing();
     cards = rotateLeft(cards);
     cardAnimation(cards);
     updateFrontCard(cards);
@@ -612,6 +620,7 @@ window.addEventListener('keydown', e => {
     else {
       console.log('delete card');
       removeAnimations();
+      removeresizing();
       animateDelete(findFrontCard(cards));
       //this prevents re-rendering card data till card is off screen
       setTimeout( () => {
@@ -694,6 +703,7 @@ function onTouchMove (e) {
     console.log(xVelocity)
     if (xVelocity > .5) {
       removeAnimations();
+      removeresizing();
       cards = rotateRight(cards);
       cardAnimation(cards);
       updateFrontCard(cards);
@@ -701,6 +711,7 @@ function onTouchMove (e) {
       document.removeEventListener("touchmove", onTouchMove)
     } else if (xVelocity < -.5) {
       removeAnimations();
+      removeresizing();
       cards = rotateLeft(cards);
       cardAnimation(cards);
       updateFrontCard(cards);
@@ -724,6 +735,7 @@ function onTouchMove (e) {
       else {
         console.log('delete card');
         removeAnimations();
+        removeresizing();
         animateDelete(findFrontCard(cards));
         //this prevents re-rendering card data till card is off screen
         setTimeout( () => {
@@ -751,10 +763,19 @@ function removeAnimations() {
   if (document.documentElement.classList.contains('animate'))
     document.documentElement.classList.remove('animate');
 }
+function addResizing() {
+  if (!document.documentElement.classList.contains('resizing'))
+    document.documentElement.classList.add('resizing');
+}
+
+function removeresizing() {
+  if (document.documentElement.classList.contains('resizing'))
+    document.documentElement.classList.remove('resizing');
+}
 
 /* Breadcrumbs/Scrollbar functionality */
 function renderBreadcrumbs(cards){
-  var crumbs = document.querySelectorAll("#card-scroll > div > div");
+  var crumbs = document.querySelectorAll("#card-scroll > div");
   crumbs.forEach(crumb => crumb.classList.remove("selected"));
 
   var selected = getIndex(cards);
@@ -762,12 +783,12 @@ function renderBreadcrumbs(cards){
 }
 
 function addCrumb() {
-  var container = document.querySelector("#card-scroll > div");
+  var container = document.querySelector("#card-scroll");
   var crumb = document.createElement('div');
   container.appendChild(crumb);
 }
 
 function removeCrumb() {
-  var firstCrumb = document.querySelector("#card-scroll > div > div");
+  var firstCrumb = document.querySelector("#card-scroll > div");
   firstCrumb.remove();
 }
