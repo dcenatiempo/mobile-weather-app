@@ -28,7 +28,7 @@ html{
   height: calc(100vh - 40px);
   width: 25rem;
   overflow: hidden;
-  box-shadow: 1rem 1rem 2rem rgba(156, 156, 156, 0.5);
+  box-shadow: 1rem -2rem 2rem rgba(156, 156, 156, 0.5);
   margin: auto;
 }
 #a {
@@ -45,7 +45,7 @@ html{
   transition: box-shadow .5s, transform .5s, height 0s linear .15s;
   -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
    height: 0;
-   box-shadow: 10rem 1rem 2rem #9c9c9c;
+   box-shadow: 10rem -2rem 2rem #9c9c9c;
 }
 .resizing .front {
   transition: initial;
