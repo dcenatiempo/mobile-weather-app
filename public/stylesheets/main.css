@@ -44,13 +44,13 @@ body {
   transform: rotateY(180deg);
 }
 .front {
-  transition: box-shadow .5s, transform .5s, height 0s linear .06s;
-  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .06s;
+  transition: box-shadow .5s, transform .5s, height 0s linear .15s;
+  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
   /* visibility: visible; */
 }
 .back {
-  transition: box-shadow .5s, transform .5s, height 0s linear .06s;
-  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .06s;
+  transition: box-shadow .5s, transform .5s, height 0s linear .15s;
+  -webkit-transition: box-shadow .5s, transform .5s, height 0s linear .15s;
    height: 0;
    box-shadow: 10rem 1rem 2rem #9c9c9c;
 }
