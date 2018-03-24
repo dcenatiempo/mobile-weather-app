@@ -13,16 +13,13 @@ body {
 html{
   font-size: 4vmin;
 }
-body {
-  perspective: 150vw;
-  background: linear-gradient(to top right, #6f6f6f, #ffffff);
-}
 .mainwrapper {
   width: 100vw;
   height: 100vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-
+  background: linear-gradient(to top right, #6f6f6f, #ffffff);
+  perspective: 150vw;
 }
 
 /* Portrait, Mobile */
