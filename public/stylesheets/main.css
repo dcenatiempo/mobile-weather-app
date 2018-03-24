@@ -538,6 +538,8 @@ background-color: rgba(169, 169, 169, 0.55);
   justify-content: center;
 }
 #card-scroll > div {
+  min-height: 6px;
+  min-width: 6px;
   height: .7rem;
   width: .7rem;
   margin: 0 .2rem;
