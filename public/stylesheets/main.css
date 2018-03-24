@@ -14,14 +14,15 @@ html{
   font-size: 4vmin;
 }
 body {
-  background: linear-gradient(to top right, #e4e4e4, #ffffff);
+  perspective: 150vw;
+  background: linear-gradient(to top right, #6f6f6f, #ffffff);
 }
 .mainwrapper {
   width: 100vw;
   height: 100vh;
   overflow-y: scroll;
   -webkit-overflow-scrolling: touch;
-  perspective: 150vw;
+
 }
 
 /* Portrait, Mobile */
