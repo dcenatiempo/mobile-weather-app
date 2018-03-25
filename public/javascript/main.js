@@ -79,6 +79,10 @@ class Weather {
 
   toggleFavorite() {
     this.favorite = !this.favorite;
+    if (this.favorite) {
+      let cardId= findFrontCard(cards);
+      document.querySelector(`#${cardId} .favorite`).classList.add('animate');
+    }
   }
 }
 
@@ -565,16 +569,24 @@ async function renderWeather(cardId, index) {
   renderWeekly(card, index);
 }
 function renderFavorites(cardId, index = null) {
+  debugger
   var card = document.getElementById(cardId);
   var fav = card.querySelector('.favorite');
-  if (index === null)
-    fav.classList.add('hidden');
-  else if (index >= 0 && myLocales[index].favorite) {
-    fav.classList.add('clicked');
-    fav.classList.remove('hidden');
+  if (index === null){
+    fav.setAttribute('hidden', '');
+    fav.classList.remove('animate');
   }
-  else
-    fav.classList.remove('clicked', 'animate', 'hidden');
+  else if (index >= 0 && myLocales[index].favorite) {
+    console.log('clicked')
+    fav.setAttribute('clicked', '');
+    fav.removeAttribute('hidden');
+  }
+  else {
+    fav.classList.remove('animate');
+    fav.removeAttribute('clicked');
+    fav.removeAttribute('hidden');
+    console.log('not clicked');
+  }
 }
 function renderHourly(card, index, h) {
   var sunrise = get24Hour(applyTimeZone(index, myLocales[index].weather.daily.data[0].sunriseTime * 1000));
@@ -658,7 +670,6 @@ for (let i=0; i<sliders.length; i++) {
 // City Input
 var cityInput = document.querySelectorAll('.city');
 cityInput.forEach( input => {
-  // input.addEventListener('focus', removeGlobalKeydown);
   
   input.addEventListener('blur', e => {
     if (input.value === '') {
@@ -667,14 +678,14 @@ cityInput.forEach( input => {
     }
     // else handleCityInput(e)
   });
+
   input.addEventListener('input', e => {
     clearUl();
-    if (input.value === '') {
+    if (input.value === '')
       addGlobalKeydown();
-    }
-    else {
+    else
       removeGlobalKeydown();
-    }
+
   });
 
 function handleArrowPress(list, dir) {
@@ -699,7 +710,6 @@ function handleArrowPress(list, dir) {
     list[highlighted].classList.add('highlight')
 }
   input.addEventListener('keydown', e => {
-    debugger
     // console.log(e.key)
     if (e.key.indexOf('Arrow') === 0) {
       console.log('you pressed '+ e.key)
