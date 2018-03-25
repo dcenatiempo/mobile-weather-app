@@ -590,10 +590,14 @@ background-color: rgba(169, 169, 169, 0.55);
 }
 #dropdown > ul > li {
   border-bottom: .1rem solid gray;
-  padding: .5rem 1rem;
+  padding: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 1.4rem;
+}
+#dropdown > ul > li.highlight {
+  background: green;
 }
 #dropdown > ul > li:last-child {
   border-bottom: none;
