@@ -1,6 +1,8 @@
 /*
  TODO:
- 5) pull down to refresh
+ 1) Move work to server
+ 2) add animations to dropdown
+ 5) menu buttons - get current location, hamburger
  7) fix safari issures - geocoding
  8) offline mode
 
@@ -40,7 +42,9 @@ class Local {
     this.lat = lat;
     this.lon = lon;
     this.city = undefined;
-    this.region = undefined
+    this.region = undefined;
+    this.country = undefined;
+    this.id = undefined;
   }
 }
 async function fetchWeather(local) {
@@ -228,11 +232,9 @@ function getCurrentPosition() {
   .then(resp => {
     return resp.json();
   }).then(json => {
-    currentLocation = new Local(json.latitude, json.longitude);
-    getCity(currentLocation.lat, currentLocation.lon)
+    getCity(json.latitude, json.longitude)
     .then(data=>{
-      currentLocation.city = data.address.city;
-      currentLocation.region = data.address.region;
+      currentLocation = extractLocale(data);
       currentLocationUpdated();
     })
   }).catch(err => {
@@ -242,11 +244,9 @@ function getCurrentPosition() {
 }
 
 async function getCurrentPositionCallback(pos) {
-  currentLocation = new Local(pos.coords.latitude, pos.coords.longitude)
-  getCity(currentLocation.lat, currentLocation.lon)
+  getCity(pos.coords.latitude, pos.coords.longitude)
   .then(data=>{
-    currentLocation.city = data.address.city;
-    currentLocation.region = data.address.region;
+    currentLocation = extractLocale(data);
     currentLocationUpdated();
   })
   .catch(err => {
@@ -275,22 +275,89 @@ async function getWeather(myLocal){
 }
 
 function handleForwardLookup(cardId, resp, index) {
-  if ("error" in resp) {
-    console.log("try again")
+  if ("error" in resp ) {
+    console.log("No results, try again")
     renderBlankCard(cardId);
   }
-  else {
-    console.log("successfully added new location")
-    saveLocation(index, resp);
-    if (index != getIndex(cards)) {
-      console.log('argh, you rotated before rendering');
-      return;
+  else { // success!
+    console.log(resp)
+    clearUl();
+    let shortList = resp.filter( item => item.class === 'place' || item.class === 'boundary');
+    console.log(shortList)
+    if (shortList.length === 0) {
+      console.log("No results, try again")
+      renderBlankCard(cardId);
     }
-    addAnimations();
-    renderWeather(cardId, index);
-    addCrumb();
-    renderBreadcrumbs(cards);
+    else if (shortList.length === 1) {
+      console.log("only 1 result!")
+      let locale = extractLocale(shortList[0]);
+      addNewLocale (locale, cardId, index);
+    }
+    else {
+      shortList.forEach( item => {
+        createLi(item);
+      });
+    }
+    
   }
+}
+function clearUl() {
+  var ul = document.querySelector('#dropdown > ul');
+  ul.innerHTML = '';
+}
+function createLi(item) {
+  var locale = extractLocale (item);
+  if (locale) {
+    var ul = document.querySelector('#dropdown > ul');
+    var li = document.createElement('li');
+    var text = document.createTextNode(`${locale.city}, ${locale.region}, ${locale.country}`);
+    li.appendChild(text);
+    li.locale = locale;
+    ul.appendChild(li);
+  }
+}
+function extractLocale(item) {
+  var address = item.address;
+  var city, region, country;
+
+  country = address.country;
+  if (country === "United States of America") country = 'USA';
+
+  if (address.state) region = address.state;
+  else if (address.state_district) region = address.state_district;
+  else if (address.region) region = address.region;
+
+  if (address.city) city = address.city;
+  else if (address.town) city = address.town;
+  else if (address.village) city = address.village;
+  else if (address.suburb) city = address.suburb;
+  else if (address.hamlet) city = address.hamlet;
+  else if (address.county) city = address.county;
+  else if (address.postcode) city = address.postcode;
+  else if (address.neighbourhood) city = address.neighbourhood;
+
+  if (city)
+    return {
+      "lat": item.lat,
+      "lon": item.lon,
+      "city": city,
+      "region": region,
+      "country": country,
+      "id": item.place_id
+    };
+  else return null;
+}
+function addNewLocale (locale, cardId, index) {
+  console.log("successfully added new location")
+  saveLocation(index, locale);
+  if (index != getIndex(cards)) {
+    console.log('argh, you rotated before rendering');
+    return;
+  }
+  addAnimations();
+  renderWeather(cardId, index);
+  addCrumb();
+  renderBreadcrumbs(cards);
 }
 
 async function forwardLookup(city) {
@@ -365,6 +432,13 @@ function get24Hour(ms) {
   var d = new Date(ms);
   var hour = d.getHours();
   return hour;
+}
+
+function getLocationString(locale) {
+  if (locale.country === "USA")
+    return `${locale.city}, ${locale.region}`;
+  else
+    return `${locale.city}, ${locale.country}`;
 }
 
 /** Card Rotation State *******************************************************/
@@ -470,7 +544,7 @@ function renderWeeklyBlank(card) {
 function renderDownloadCard(cardId, index) {
   var card = document.getElementById(cardId);
   card.setAttribute('status', 'downloading');
-  card.querySelector('.city').value = myLocals[index].local.city;
+  card.querySelector('.city').value = getLocationString(myLocals[index].local);
   // card.querySelector('.city').style.pointerEvents = 'none';
   // card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
@@ -504,7 +578,7 @@ function renderWeeklyDownload(card) {
 // Card with weather
 async function renderWeather(cardId, index) {
   var card = document.getElementById(cardId);
-  card.querySelector('.city').value = myLocals[index].local.city;
+  card.querySelector('.city').value = getLocationString(myLocals[index].local);
   card.querySelector('.city').classList.add('filled');
   card.querySelector('.city').disabled = true;
   renderFavorites(cardId, index);
@@ -657,27 +731,37 @@ for (let i=0; i<sliders.length; i++) {
 // City Input
 var cityInput = document.querySelectorAll('.city');
 for (let i=0; i<cityInput.length; i++) {
-  cityInput[i].addEventListener('blur', async e => {
-    if (e.target.value === '') return;
-    if (e.target.disabled === true) return;
+  // cityInput[i].addEventListener('blur', async e => {
+  //   if (e.target.value === '') return;
+  //   // if (e.target.disabled === true) return;
 
-    var card = e.target.parentNode.parentNode.id;
-    e.target.disabled = true;
-    index = getIndex(cards);
-    let resp = await forwardLookup(e.target.value);
-    handleForwardLookup(card, resp, index);
-  });
+  //   var card = e.target.parentNode.parentNode.id;
+  //   e.target.disabled = true;
+  //   // index = getIndex(cards);
+  //   let resp = await forwardLookup(e.target.value);
+  //   handleForwardLookup(card, resp, index);
+  // });
   cityInput[i].addEventListener('keypress', async e => {
     if (e.keyCode === 13) {
       if (e.target.value === '') return;
-      var card = e.target.parentNode.parentNode.id;
-      e.target.disabled = true;
-      index = getIndex(cards);
+      var card = findFrontCard(cards);
+      // e.target.disabled = true;
+      var index = getIndex(cards);
       let resp = await forwardLookup(e.target.value);
       handleForwardLookup(card, resp, index);
     }
   })
 }
+
+// select from dropdown
+var dropdown = document.querySelector('#dropdown');
+dropdown.addEventListener('click', (e) => {
+  console.log(e.target.locale);
+  clearUl();
+  var cardId = findFrontCard(cards);
+  var index = getIndex(cards);
+  addNewLocale (e.target.locale, cardId, index);
+})
 
 // Swiping Left/Right/Up
 document.addEventListener("touchstart", (e)=> {

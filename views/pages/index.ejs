@@ -11,13 +11,8 @@
     <main id="b" class="city-page back" time="daytime" status="blank">
       <% include ../partials/card.ejs %>
     </main>
-    <div id="menu-bar">
-      <button><img src="../images/geo-location.png"></button>
-      <div id="card-scroll">
-        <div class="selected"></div>
-      </div>
-      <button>☰</button>
-    </div>
+    <% include ../partials/menu.ejs %>
+    <% include ../partials/dropdown.ejs %>
   </div>
 </body>
 <% include ../partials/scripts.ejs %>
