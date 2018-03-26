@@ -889,7 +889,6 @@ function onTouchMove (e) {
     console.log('x wins!')
     console.log(xVelocity)
     if (xVelocity > .5) {
-      hardClearUl();
       removeAnimations();
       removeresizing();
       cards = rotateRight(cards);
