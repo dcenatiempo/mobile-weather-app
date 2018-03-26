@@ -308,6 +308,10 @@ function handleForwardLookup(cardId, resp, index) {
     
   }
 }
+function hardClearUl() {
+  document.querySelector('#dropdown > ul').innerHTML = '';
+  addGlobalKeydown();
+}
 function clearUl() {
   var ul = document.querySelector('#dropdown > ul');
   var list = document.querySelectorAll('#dropdown > ul > li');
@@ -321,7 +325,6 @@ function clearUl() {
       clearInterval(interval2);
       list = document.querySelectorAll('#dropdown > ul > li');
       let highlighted = length - 1;
-      ul.classList.add('fade');
       list.forEach( (item, index) => {
         if (item.classList.contains('highlight'))
           highlighted = index;
@@ -347,7 +350,6 @@ function clearUl() {
       console.log(time)
       setTimeout( () => {
         ul.innerHTML = '';
-        ul.classList.remove('fade');
         addGlobalKeydown();
       }, time*50);
 
@@ -887,7 +889,7 @@ function onTouchMove (e) {
     console.log('x wins!')
     console.log(xVelocity)
     if (xVelocity > .5) {
-      clearUl();
+      hardClearUl();
       removeAnimations();
       removeresizing();
       cards = rotateRight(cards);
