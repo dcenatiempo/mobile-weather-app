@@ -181,10 +181,14 @@ div.nighttime {
 .city {
   grid-row: 1;
   grid-column: 1 / 4;
-  font-size: 3rem;
-  margin-top:1rem;
+  font-size: 2.3rem;
+  margin-top: 1rem;
+  padding: .5rem 0;
   border: none;
   background-color: #f7fdff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .filled {
   pointer-events: none;
@@ -206,6 +210,7 @@ div.nighttime {
   grid-row: 3;
   grid-column: 2 / 3;
   font-size: 4rem;
+  font-weight: 200;
   justify-self: center;
 }
 .details {
@@ -293,11 +298,11 @@ div.nighttime {
   grid-row: 3;
   grid-column: 1 / 2;
   width: 5.5rem;
-  height: 4.5rem;
+  height: 5rem;
   align-self: center;
   justify-self: center;
-  background-size: 7rem;
-  background-position: -1rem -1.2rem;
+  background-size: 9.5rem;
+  background-position: -2rem -2.4rem;
 }
 .week-forecast .weather-icon {
   width: 4.5rem;
@@ -575,26 +580,42 @@ background-color: rgba(169, 169, 169, 0.55);
   max-height: calc(100vh - 40px - 5.5rem);
   width: 100vw;
   background: transparent;
-  top: 5.3rem;
+  top: 5.1rem;
   overflow-y: hidden;
 }
 #dropdown > ul {
   list-style: none;
-  background: white;
-  width: 23.95rem;
+  background: #f7fdff;
+  width: 24rem;
   margin: auto;
-  padding: 0 .5rem;
   overflow-y: auto;
   max-height: calc(100vh - 40px - 5.5rem);
   border-radius: 0 0 .5rem .5rem;
 }
 #dropdown > ul > li {
-  border-bottom: .1rem solid gray;
+  color: gray;
+  background: #f7fdff;
+  border-top: .1rem solid gray;
   padding: 1rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 1.4rem;
+  animation-name: createLi;
+  animation-duration: .2s;
+  animation-iteration-count: 1;
+  transition: opacity .2s;
+}
+@keyframes createLi {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: .3;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 #dropdown > ul > li.highlight {
   background: #d8f1ff;
@@ -602,6 +623,9 @@ background-color: rgba(169, 169, 169, 0.55);
 #dropdown > ul > li:active {
   background: #d8f1ff;
 }
-#dropdown > ul > li:last-child {
-  border-bottom: none;
+#dropdown > ul.fade {
+  background: transparent;
+}
+#dropdown > ul > li.fade {
+  opacity: 0;
 }

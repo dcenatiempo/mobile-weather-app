@@ -21,21 +21,21 @@ if (navigator.vendor.indexOf('Apple') >= 0) {
   });
 }
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').then(function(registration) {
-      // Registration was successful
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function(err) {
-      // registration failed :(
-      console.log('ServiceWorker registration failed: ', err);
-    });
-  });
-}
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', function() {
+//     navigator.serviceWorker.register('/sw.js').then(function(registration) {
+//       // Registration was successful
+//       console.log('ServiceWorker registration successful with scope: ', registration.scope);
+//     }, function(err) {
+//       // registration failed :(
+//       console.log('ServiceWorker registration failed: ', err);
+//     });
+//   });
+// }
 
 var prodUrl = 'https://devins-weather-app.herokuapp.com/';
 var devUrl = 'http://localhost:5000/';
-var appUrl = prodUrl;
+var appUrl = devUrl;
 
 class locale {
   constructor(lat, lon) {
@@ -282,13 +282,11 @@ function handleForwardLookup(cardId, resp, index) {
   clearUl();
   if ("error" in resp ) {
     console.log("No results, try again")
-    // renderBlankCard(cardId);
   }
   else { // success!
     console.log(resp)
     if (resp.length === 0) {
       console.log("No results, try again")
-      // renderBlankCard(cardId);
     }
     else if (resp.length === 1) {
       console.log("only 1 result!")
@@ -296,28 +294,81 @@ function handleForwardLookup(cardId, resp, index) {
       addNewlocale (locale, cardId, index);
     }
     else {
-      resp.forEach( item => {
-        createLi(item);
-      });
+      // wait till list is completely gone
+      let interval = setInterval(()=>{
+        var list = document.querySelectorAll('#dropdown > ul > li');
+        if (list.length === 0) {
+          clearInterval(interval);
+          resp.forEach( (item, i) => {
+            createLi(item, i);
+          });
+        }
+      }, 10);
     }
     
   }
 }
 function clearUl() {
   var ul = document.querySelector('#dropdown > ul');
-  ul.innerHTML = '';
+  var list = document.querySelectorAll('#dropdown > ul > li');
+  let length = list.length;
+  if (length === 0) return;
+
+ // make sure list is done growing
+  let interval2 = setInterval(()=>{
+    console.log(document.querySelectorAll('#dropdown > ul > li').length + "?===" + length)
+    if (document.querySelectorAll('#dropdown > ul > li').length === length) {
+      clearInterval(interval2);
+      list = document.querySelectorAll('#dropdown > ul > li');
+      let highlighted = length - 1;
+      ul.classList.add('fade');
+      list.forEach( (item, index) => {
+        if (item.classList.contains('highlight'))
+          highlighted = index;
+      });
+
+      let upcount = 0;
+      for (let i=highlighted; i<length; i++) {
+        setTimeout( () => {
+          console.log('deleting ' + i)
+          list[i].classList.add('fade');
+        }, upcount*50);
+        upcount++;
+      }
+      let downcount = 0;
+      for (let i=highlighted-1; i>=0; i--) {
+        setTimeout( () => {
+          console.log('deleting ' + i)
+          list[i].classList.add('fade');
+        }, downcount*50);
+        downcount++;
+      }
+      let time = highlighted >= length/2 ? highlighted : length - highlighted;
+      console.log(time)
+      setTimeout( () => {
+        ul.innerHTML = '';
+        ul.classList.remove('fade');
+        addGlobalKeydown();
+      }, time*50);
+
+    }
+    length = document.querySelectorAll('#dropdown > ul > li').length;
+  }, 50);
 }
-function createLi(locale) {
+
+function createLi(locale, i) {
   var ul = document.querySelector('#dropdown > ul');
   var li = document.createElement('li');
   var text = document.createTextNode(`${locale.city}, ${locale.region}, ${locale.country}`);
   li.appendChild(text);
   li.locale = locale;
-  ul.appendChild(li);
+  setTimeout( () =>{
+    ul.appendChild(li);
+  }, i*50);
 }
 
 function addNewlocale (locale, cardId, index) {
-  console.log("successfully added new location")
+  console.log("successfully added new location");
   saveLocation(index, locale);
   if (index != getIndex(cards)) {
     console.log('argh, you rotated before rendering');
@@ -515,6 +566,7 @@ function renderDownloadCard(cardId, index) {
   var card = document.getElementById(cardId);
   card.setAttribute('status', 'downloading');
   card.querySelector('.city').value = getLocationString(myLocales[index].locale);
+  card.querySelector('.city').blur();
   // card.querySelector('.city').style.pointerEvents = 'none';
   // card.querySelector('.city').style.cursor = 'text';
   card.querySelector('.todays-forecast .forecast').innerText = 'Getting weather...';
@@ -569,7 +621,6 @@ async function renderWeather(cardId, index) {
   renderWeekly(card, index);
 }
 function renderFavorites(cardId, index = null) {
-  debugger
   var card = document.getElementById(cardId);
   var fav = card.querySelector('.favorite');
   if (index === null){
@@ -577,7 +628,6 @@ function renderFavorites(cardId, index = null) {
     fav.classList.remove('animate');
   }
   else if (index >= 0 && myLocales[index].favorite) {
-    console.log('clicked')
     fav.setAttribute('clicked', '');
     fav.removeAttribute('hidden');
   }
@@ -585,7 +635,6 @@ function renderFavorites(cardId, index = null) {
     fav.classList.remove('animate');
     fav.removeAttribute('clicked');
     fav.removeAttribute('hidden');
-    console.log('not clicked');
   }
 }
 function renderHourly(card, index, h) {
@@ -623,7 +672,6 @@ function renderWeekly(card, index) {
 // remove animate on resize
 window.addEventListener('resize', () => {
   addResizing();
-  console.log('resizing!')
 })
 
 // remove hover effects if on touch device
@@ -685,36 +733,34 @@ cityInput.forEach( input => {
       addGlobalKeydown();
     else
       removeGlobalKeydown();
-
   });
 
-function handleArrowPress(list, dir) {
-  let highlighted = -1;
-  let length = list.length;
-  if (length === 0) return;
+  function handleArrowPress(list, dir) {
+    let highlighted = -1;
+    let length = list.length;
+    if (length === 0) return;
 
-  list.forEach( (item, index) => {
-    if (item.classList.contains('highlight'))
-      highlighted = index;
-  });
-  if (highlighted >=0)
-   list[highlighted].classList.remove('highlight');
+    list.forEach( (item, index) => {
+      if (item.classList.contains('highlight'))
+        highlighted = index;
+    });
+    if (highlighted >=0)
+    list[highlighted].classList.remove('highlight');
 
-  if (dir === 'down') highlighted++;
-  else if (dir === 'up') highlighted--;
+    if (dir === 'down') highlighted++;
+    else if (dir === 'up') highlighted--;
 
-  if (highlighted >= length) highlighted = 0;
-  else if (highlighted < 0) highlighted = -1;
+    if (highlighted >= length) highlighted = 0;
+    else if (highlighted < 0) highlighted = -1;
 
-  if (highlighted >= 0)
-    list[highlighted].classList.add('highlight')
-}
+    if (highlighted >= 0)
+      list[highlighted].classList.add('highlight')
+  }
+  
   input.addEventListener('keydown', e => {
     // console.log(e.key)
     if (e.key.indexOf('Arrow') === 0) {
-      console.log('you pressed '+ e.key)
       let list = document.querySelectorAll('#dropdown > ul > li');
-      console.log(list)
       if (e.key === 'ArrowDown')
         handleArrowPress(list, 'down');
       else if (e.key === 'ArrowUp') {
@@ -726,14 +772,19 @@ function handleArrowPress(list, dir) {
       if (highlight) {
         let cardId = findFrontCard(cards);
         let index = getIndex(cards);
-        addNewlocale (highlight.locale, cardId, index);
+        let locale = highlight.locale;
         clearUl();
         addGlobalKeydown();
+        addNewlocale (locale, cardId, index);
       }
       else handleCityInput(e);
     }
     else if (e.key === 'Escape') {
-      input.value = '';
+      console.log('you pressed escape')
+      setTimeout(()=>{
+        renderBlankCard(findFrontCard(cards));
+      },10)
+      
       // input.blur();
       clearUl();
       addGlobalKeydown();
@@ -765,7 +816,7 @@ async function handleCityInput (e) {
 // select from dropdown
 var dropdown = document.querySelector('#dropdown');
 dropdown.addEventListener('click', (e) => {
-  console.log(e.target.locale);
+  e.target.classList.add('highlight');
   clearUl();
   var cardId = findFrontCard(cards);
   var index = getIndex(cards);
@@ -776,7 +827,6 @@ dropdown.addEventListener('click', (e) => {
 // Keypress events: flip cards & delete card
 window.addEventListener('keydown', handleGlobalKeydown);
 function handleGlobalKeydown(e) {
-  console.log(e.key)
   if (myLocales.length === 0) return;
   if (e.key === 'ArrowLeft') { // 'left arrow'
     removeAnimations();
