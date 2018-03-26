@@ -18,13 +18,13 @@ app.get('/weather/:geo', async (req, res) => {
   let coords = req.params.geo;
   res.json(await getWeather(coords));
 });
-app.get('/location/reverse/:local', async (req, res) => {
-  let local = req.params.local;
-  res.json(await reverseGeo(local));
+app.get('/location/reverse/:locale', async (req, res) => {
+  let locale = req.params.locale;
+  res.json(await reverseGeo(locale));
 });
-app.get('/location/forward/:local', async (req, res) => {
-  let local = req.params.local;
-  res.json(await forwardGeo(local));
+app.get('/location/forward/:locale', async (req, res) => {
+  let locale = req.params.locale;
+  res.json(await forwardGeo(locale));
 });
 
 const server = app.listen(PORT, () => {
@@ -32,53 +32,139 @@ const server = app.listen(PORT, () => {
 });
 
 // https://darksky.net/
-async function getWeather(myLocal){
+async function getWeather(myLocale){
   const apiKey = 'fc4be215ca9376fe83fcdcaf1b226d86';
-  let url = `https://api.darksky.net/forecast/${apiKey}/${myLocal}`;
+  let url = `https://api.darksky.net/forecast/${apiKey}/${myLocale}`;
   let response = await fetch(url);
   let data = await response.json();
   return data;
 }
 
 //https://locationiq.org/
-async function reverseGeo(local){
+async function reverseGeo(coords){
+  // takes a set of coordinates and returns a single formatted locale
   const apiKey = '94be5df0e46402';
-  local = local.split(',');
-  let url = `https://us1.locationiq.org/v1/reverse.php?key=${apiKey}&lat=${local[0]}&lon=${local[1]}&format=json`;
+  coords = coords.split(',');
+  let url = `https://us1.locationiq.org/v1/reverse.php?key=${apiKey}&lat=${coords[0]}&lon=${coords[1]}&format=json`;
   let response = await fetch(url);
-  let data = await response.json();
-  return data;
+  let locale = await response.json();
+  locale = extractLocale(locale);
+  return locale;
 }
 
-async function forwardGeo(local){
+async function forwardGeo(searchString){
+  // takes a location search string and returns a formatted list of locales
   const apiKey = '94be5df0e46402';
-  let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${local}&format=json`;
+  let url = `https://us1.locationiq.org/v1/search.php?key=${apiKey}&q=${searchString}&format=json&addressdetails=1&zoom=15`;
   let response = await fetch(url);
   let data = await response.json();
-  console.log(data)
-  let length = data.length;
+  // console.log(data)
+  if (data.length === 0) return { "error": "invalid search"};
+  data = filterSearchResults(data);
+  let localeList = 
+    data.map(item => extractLocale(item))
+        .filter(item => item !== null);
+  console.log(localeList)
+  if (localeList.length === 0) return { "error": "no valid results"};
+  return localeList;
+}
 
-  for (let i=0; i<length; i++) {
-    if (data[i].display_name.indexOf('United States of America') > 0) {
-      data = data[i].lat + ',' + data[i].lon;
-      i = length;
-    }
+function filterSearchResults (data) {
+  // filter out fluff like bars, restuarants, and tourist traps 
+  return data.filter( item => item.class === 'place' || item.class === 'boundary');
+}
+
+function extractLocale(item) {
+  var address = item.address;
+  var city, region, country;
+
+  country = address.country;
+
+  if (address.state) region = address.state;
+  else if (address.state_district) region = address.state_district;
+  else if (address.region) region = address.region;
+
+  if (address.city) city = address.city;
+  else if (address.town) city = address.town;
+  else if (address.village) city = address.village;
+  else if (address.suburb) city = address.suburb;
+  else if (address.hamlet) city = address.hamlet;
+  else if (address.county) city = address.county;
+  else if (address.postcode) city = address.postcode;
+  else if (address.neighbourhood) city = address.neighbourhood;
+
+  if (country === "United States of America") {
+    country = 'USA';
+    region = abbreviateState(region);
   }
-  // data = data[0].lat + ',' + data[0].lon;//remove
 
-  if (typeof data === "string") {
-    let geo = await reverseGeo(data)
-    console.log(geo);
-    var city;
-    if ("city" in geo.address) city = geo.address.city;
-    else if ("town" in geo.address) city = geo.address.town;
-    else if ("county" in geo.address) city = geo.address.county;
+  if (city)
     return {
-      "lat": geo.lat,
-      "lon": geo.lon,
+      "lat": item.lat,
+      "lon": item.lon,
       "city": city,
-      "region": geo.address.state
+      "region": region,
+      "country": country,
+      "id": item.place_id
     };
-  }
-  else return { "error": "invalid search"}
+  else return null;
+}
+
+function abbreviateState(state) {
+  var states = {
+    'Arizona': 'AZ',
+    'Alabama': 'AL',
+    'Alaska': 'AK',
+    'Arizona': 'AZ',
+    'Arkansas': 'AR',
+    'California': 'CA',
+    'Colorado': 'CO',
+    'Connecticut': 'CT',
+    'Delaware': 'DE',
+    'Florida': 'FL',
+    'Georgia': 'GA',
+    'Hawaii': 'HI',
+    'Idaho': 'ID',
+    'Illinois': 'IL',
+    'Indiana': 'IN',
+    'Iowa': 'IA',
+    'Kansas': 'KS',
+    'Kentucky': 'KY',
+    'Kentucky': 'KY',
+    'Louisiana': 'LA',
+    'Maine': 'ME',
+    'Maryland': 'MD',
+    'Massachusetts': 'MA',
+    'Michigan': 'MI',
+    'Minnesota': 'MN',
+    'Mississippi': 'MS',
+    'Missouri': 'MO',
+    'Montana': 'MT',
+    'Nebraska': 'NE',
+    'Nevada': 'NV',
+    'New Hampshire': 'NH',
+    'New Jersey': 'NJ',
+    'New Mexico': 'NM',
+    'New York': 'NY',
+    'North Carolina': 'NC',
+    'North Dakota': 'ND',
+    'Ohio': 'OH',
+    'Oklahoma': 'OK',
+    'Oregon': 'OR',
+    'Pennsylvania': 'PA',
+    'Rhode Island': 'RI',
+    'South Carolina': 'SC',
+    'South Dakota': 'SD',
+    'Tennessee': 'TN',
+    'Texas': 'TX',
+    'Utah': 'UT',
+    'Vermont': 'VT',
+    'Virginia': 'VA',
+    'Washington': 'WA',
+    'West Virginia': 'WV',
+    'Wisconsin': 'WI',
+    'Wyoming': 'WY',
+  };
+
+return states[state];
 }

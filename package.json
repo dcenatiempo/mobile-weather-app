@@ -1,6 +1,6 @@
 {
   "name": "mobile-weather-app",
-  "version": "1.6.0",
+  "version": "1.7.2",
   "description": "A mobile first responsive weather app",
   "main": "index.js",
   "scripts": {
