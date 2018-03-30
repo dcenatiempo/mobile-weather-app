@@ -535,6 +535,7 @@ background-color: rgba(169, 169, 169, 0.55);
   justify-content: center;
   transform: translateZ(0);
   padding: 0 1rem;
+  z-index:10;
 }
 #card-scroll {
   width: calc(100vw - 80px);
@@ -585,7 +586,7 @@ background-color: rgba(169, 169, 169, 0.55);
 }
 #dropdown > ul {
   list-style: none;
-  background: #f7fdff;
+  background: transparent;
   width: 24rem;
   margin: auto;
   overflow-y: auto;
@@ -628,4 +629,34 @@ background-color: rgba(169, 169, 169, 0.55);
 }
 #dropdown > ul > li.fade {
   opacity: 0;
+}
+
+#menu {
+  position: absolute;
+  height: calc(100vh - 40px);
+  width: calc(100vw + 4rem);
+  left: -2rem;
+  padding: 15px;
+  background-color: rgba(0, 0, 0, 0.5);
+  bottom: calc(-100vh - 3rem);
+  transition: bottom .3s;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
+  font-size: 2.5rem;
+  line-height: 1.5;
+  color: white;
+  box-shadow: 0 -3rem 3rem rgba(0, 0, 0, 0.5);
+}
+#menu[open] {
+  bottom: 40px;
+}
+#menu > ul {
+  list-style: none;
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-end;
 }
