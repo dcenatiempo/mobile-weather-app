@@ -1,7 +1,5 @@
 /*
  TODO:
- 1) Move work to server
- 2) add animations to dropdown
  5) menu buttons - get current location, hamburger
  7) fix safari issures - geocoding
  8) offline mode
@@ -99,6 +97,7 @@ var cards = {                // position of 2 weather cards in DOM
     position: 1 //'back'
   },
 };
+var searchResults;
 
 /** Local Storage *************************************************************/
 function saveLocation(index, current) {
@@ -179,33 +178,41 @@ if (myLocales.length > 0) {
 }
 
 /* 3) get current location */
-if ("geolocation" in navigator) {
-  // use geolocation API
-  try{
-  navigator.geolocation.getCurrentPosition(getCurrentPositionCallback);
+getCurrentLocation();
+
+function getCurrentLocation() {
+  debugger
+  if ("geolocation" in navigator) {
+    // use geolocation API
+    try {
+      navigator.geolocation.getCurrentPosition(getCurrentPositionCallback);
+    } catch(e) {
+      getCurrentPosition()
+        .then( data => { getCurrentPositionCallback(data); });
+    }
+    // check to see if permission denied
+    try {
+      navigator.permissions.query({name:'geolocation'})
+      .then(resp =>{
+        debugger
+        if (resp.state === "denied")
+          getCurrentPosition()
+            .then( data => { getCurrentPositionCallback(data); });
+      });
+    } catch(e) {
+      // In safari, this will always catch
+      // Wait to see if geolocation API works,
+      //   if not, use alternate geo API
+      setTimeout(()=>{
+        if (!currentLocation)
+          getCurrentPosition()
+            .then( data => { getCurrentPositionCallback(data); });
+      },1000);
+    }
+  } else {
+    getCurrentPosition()
+      .then( data => { getCurrentPositionCallback(data); });
   }
-  catch(e){
-    getCurrentPosition();
-  }
-  // check to see if permission denied
-  try{
-    navigator.permissions.query({name:'geolocation'})
-    .then(resp =>{
-      if (resp.state === "denied")
-        getCurrentPosition();
-    });
-  }
-  catch(e){
-    // In safari, this will always catch
-    // Wait to see if geolocation API works,
-    //   if not, use alternate geo API
-    setTimeout(()=>{
-      if (!currentLocation)
-      getCurrentPosition();
-    },1000);
-  }
-} else {
-  getCurrentPosition();
 }
 
 /* When current location is fetched, do this*/
@@ -230,25 +237,20 @@ async function currentLocationUpdated() {
 }
 
 /** REST API calls ************************************************************/
-function getCurrentPosition() {
+async function getCurrentPosition() {
   console.warn('Location may be innacurate if on mobile network');
-  fetch('https://freegeoip.net/json/?callback=')
-  .then(resp => {
-    return resp.json();
-  }).then(json => {
-    getCity(json.latitude, json.longitude)
-    .then(data=>{
-      currentLocation = data;
-      currentLocationUpdated();
-    })
-  }).catch(err => {
-    console.error(err);
-    console.warn("trouble getting location")
-  });
+  let resp = await fetch('https://freegeoip.net/json/?callback=');
+  let data = await resp.json();
+  return data;
 }
 
 async function getCurrentPositionCallback(pos) {
-  getCity(pos.coords.latitude, pos.coords.longitude)
+  debugger
+  if ('coords' in pos) pos = {
+    latitude: pos.coords.latitude,
+    longitude: pos.coords.longitude
+  }
+  getCity(pos.latitude, pos.longitude)
   .then(data=>{
     currentLocation = data;
     currentLocationUpdated();
@@ -305,9 +307,14 @@ function handleForwardLookup(cardId, resp, index) {
         }
       }, 10);
     }
-    
   }
 }
+function saveSearch(term) {
+  // check to see if search term in searchResults
+  if (term in searchResults) {}//xxx
+
+}
+
 function hardClearUl() {
   document.querySelector('#dropdown > ul').innerHTML = '';
   addGlobalKeydown();
@@ -522,6 +529,7 @@ function cardAnimation(cards) {
 // Blank Weather Card
 function renderBlankCard(cardId) {
   var card = document.getElementById(cardId);
+  card.focus();
   card.setAttribute('status', 'blank');
   card.setAttribute('time', 'daytime')
   /*******************************/
@@ -568,6 +576,7 @@ function renderDownloadCard(cardId, index) {
   var card = document.getElementById(cardId);
   card.setAttribute('status', 'downloading');
   card.querySelector('.city').value = getLocationString(myLocales[index].locale);
+  card.querySelector('.city').disabled = true;
   card.querySelector('.city').blur();
   // card.querySelector('.city').style.pointerEvents = 'none';
   // card.querySelector('.city').style.cursor = 'text';
@@ -602,20 +611,46 @@ function renderWeeklyDownload(card) {
 // Card with weather
 async function renderWeather(cardId, index) {
   var card = document.getElementById(cardId);
+  card.focus();
   card.querySelector('.city').value = getLocationString(myLocales[index].locale);
   card.querySelector('.city').classList.add('filled');
   card.querySelector('.city').disabled = true;
   renderFavorites(cardId, index);
 
+  // 1) Is there any weather to render?
   if (!myLocales[index].weather) {
+    // if not, then fetch it
     addAnimations();
     renderDownloadCard(cardId, index)
     await myLocales[index].fetchWeather();
   }
+  
+  /*
+  // Is the weather data old?
+  else {
+    // what hour do I fall in weather.hourly.data[?].time
+    let data = myLocales[index].weather.hourly.data;
+    let now = (new Date()).getTime();
+    let hour = 0;
+    for (let i=0; i<data.length; i++) {
+      let dif = now - data[i]*1000;
+      if (dif < 3600)
+        hour = i;
+    }
+    if (hour > 0) {
+      // if I am online, get updated weather
+      // if I am offline, display up to the next 24 hours
+    }
+  }
+  */
+
+  // 3) Am I still on the card that needs to be rendered?
   if (index != getIndex(cards)) {
+    // if not, then don't render
     console.log('argh, you rotated before rendering');
     return;
   }
+  
   card.setAttribute('status', 'ready');
   card.querySelector('.todays-forecast .forecast').innerText = myLocales[index].weather.hourly.summary;
   card.querySelector('.week-forecast .forecast').innerText = myLocales[index].weather.daily.summary;
@@ -682,6 +717,25 @@ document.addEventListener('touchstart', function addtouchclass(e){
   document.removeEventListener('touchstart', addtouchclass, false);
 }, false)
 
+// menu button
+document.querySelector('#hamburger').addEventListener('click', e => {
+  var menu = document.querySelector('#menu');
+  if (menu.hasAttribute('open')) {
+    menu.removeAttribute('open');
+    addGlobalKeydown();
+    addTouch();
+  }
+  else {
+    menu.setAttribute('open', '');
+    removeGlobalKeydown();
+    removeTouch();
+  }
+})
+// location button
+document.querySelector('#geo').addEventListener('click', e => {
+  getCurrentLocation();
+})
+
 // favorites button
 var favorites = document.querySelectorAll('.favorite');
 favorites.forEach(button => {
@@ -722,9 +776,9 @@ var cityInput = document.querySelectorAll('.city');
 cityInput.forEach( input => {
   
   input.addEventListener('blur', e => {
+    addGlobalKeydown();
     if (input.value === '') {
       clearUl();
-      addGlobalKeydown();
     }
     // else handleCityInput(e)
   });
@@ -805,7 +859,15 @@ function addGlobalKeydown () {
   console.log('you may now flip with keys!')
   window.addEventListener('keydown', handleGlobalKeydown);
 }
-
+function removeTouch () {
+  console.log('no touch flipping!')
+  document.removeEventListener("touchstart", handleGlobalTouch);
+  document.removeEventListener("touchmove", onTouchMove);
+}
+function addTouch () {
+  console.log('you may now use touch to flip')
+  document.addEventListener("touchstart", handleGlobalTouch);
+}
 async function handleCityInput (e) {
   if (e.target.value === '') return;
   var card = findFrontCard(cards);
@@ -824,7 +886,6 @@ dropdown.addEventListener('click', (e) => {
   var index = getIndex(cards);
   addNewlocale (e.target.locale, cardId, index);
 })
-
 
 // Keypress events: flip cards & delete card
 window.addEventListener('keydown', handleGlobalKeydown);
@@ -867,7 +928,11 @@ function handleGlobalKeydown(e) {
   }
 }
 // Swiping Left/Right/Up
-document.addEventListener("touchstart", function handleGlobalTouch(e) {
+function addTouchEvents () {
+  
+}
+document.addEventListener("touchstart", handleGlobalTouch);
+function handleGlobalTouch(e) {
   if (myLocales.length === 0) return;
   if (!e.target.classList.contains('slider') && !e.target.classList.contains('favorite')) {
     document.addEventListener("touchmove", onTouchMove)
@@ -877,7 +942,7 @@ document.addEventListener("touchstart", function handleGlobalTouch(e) {
     x: e.changedTouches[0].clientX,
     time: e.timeStamp
   }
-})
+};
 
 function onTouchMove (e) {
   var x = e.changedTouches[0].clientX;
@@ -889,6 +954,7 @@ function onTouchMove (e) {
     console.log('x wins!')
     console.log(xVelocity)
     if (xVelocity > .5) {
+      hardClearUl();
       removeAnimations();
       removeresizing();
       cards = rotateRight(cards);
@@ -897,6 +963,7 @@ function onTouchMove (e) {
       renderBreadcrumbs(cards);
       document.removeEventListener("touchmove", onTouchMove)
     } else if (xVelocity < -.5) {
+      hardClearUl();
       removeAnimations();
       removeresizing();
       cards = rotateLeft(cards);
@@ -979,3 +1046,4 @@ function removeCrumb() {
   var firstCrumb = document.querySelector("#card-scroll > div");
   firstCrumb.remove();
 }
+
